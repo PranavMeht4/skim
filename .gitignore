@@ -4,3 +4,4 @@ evals/runs/
 docs/shots/node_modules/
 docs/shots/rec-*.log
 docs/shots/pair-*.html
+.claude-plugin/types/
