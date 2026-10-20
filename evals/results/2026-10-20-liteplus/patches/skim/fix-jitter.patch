@@ -1,0 +1,50 @@
+diff -ruN <repo>/evals/fixture/src/retry.js <tmp>/skim-eval-skim-fix-jitter-gzrQt9/reminder-service/src/retry.js
+--- <repo>/evals/fixture/src/retry.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-jitter-gzrQt9/reminder-service/src/retry.js	2026-10-20 17:02:46
+@@ -6,7 +6,8 @@
+ export function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {
+   const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);
+   const jitter = (Math.random() - 0.5) * JITTER_MS;
+-  return exp + jitter;
++  // Keep the jittered delay within [0, maxDelayMs].
++  return Math.min(maxDelayMs, Math.max(0, exp + jitter));
+ }
+ 
+ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+diff -ruN <repo>/evals/fixture/test/retry.test.js <tmp>/skim-eval-skim-fix-jitter-gzrQt9/reminder-service/test/retry.test.js
+--- <repo>/evals/fixture/test/retry.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-jitter-gzrQt9/reminder-service/test/retry.test.js	2026-10-20 17:02:55
+@@ -1,6 +1,6 @@
+ import { test, beforeEach, afterEach } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { withRetry } from '../src/retry.js';
++import { backoffDelay, withRetry } from '../src/retry.js';
+ 
+ let realRandom;
+ beforeEach(() => { realRandom = Math.random; Math.random = () => 0.5; }); // no jitter
+@@ -29,4 +29,25 @@
+     withRetry(async () => { throw new Error(`fail ${++calls}`); }, { attempts: 2, baseMs: 1 }),
+     /fail 2/,
+   );
++});
++
++test('backoffDelay never goes below 0 with the most negative jitter', () => {
++  Math.random = () => 0;
++  assert.equal(backoffDelay(0, { baseMs: 1 }), 0);
++});
++
++test('backoffDelay never goes above maxDelayMs with the most positive jitter', () => {
++  Math.random = () => 0.999999;
++  assert.equal(backoffDelay(20, { baseMs: 200, maxDelayMs: 10_000 }), 10_000);
++});
++
++test('backoffDelay stays within [0, maxDelayMs] for any jitter', () => {
++  const opts = { baseMs: 50, maxDelayMs: 2_000 };
++  for (const r of [0, 0.1, 0.25, 0.5, 0.75, 0.9, 0.999999]) {
++    Math.random = () => r;
++    for (let attempt = 0; attempt < 12; attempt++) {
++      const d = backoffDelay(attempt, opts);
++      assert.ok(d >= 0 && d <= opts.maxDelayMs, `attempt ${attempt}, random ${r}: ${d}`);
++    }
++  }
+ });

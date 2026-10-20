@@ -1,0 +1,155 @@
+{
+  "arm": "skim",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 184975,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 183626,
+  "stop_reason": "end_turn",
+  "session_id": "634ef0b2-ba08-490d-a8b3-1bf41f395f55",
+  "total_cost_usd": 0.9221893999999999,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 38389,
+    "cache_read_input_tokens": 286382,
+    "output_tokens": 12395,
+    "output_tokens_details": {
+      "thinking_tokens": 8331
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34336,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3202,
+        "cache_read_input_tokens": 46190,
+        "cache_creation_input_tokens": 197,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 197
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 48439,
+        "output_tokens": 6412,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 4209,
+        "cache_read_input_tokens": 46387,
+        "cache_creation_input_tokens": 4053,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 4053,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 48455,
+      "outputTokens": 18807,
+      "cacheReadInputTokens": 286382,
+      "cacheCreationInputTokens": 38389,
+      "webSearchRequests": 0,
+      "costUSD": 0.9221893999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 8331,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_016UQLfkmKm2ZsAvjAP8MBUX",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100 && echo && wc -l $(find . -type f \\( -name '*.ts' -o -name '*.js' -o -name '*.py' -o -name '*.go' \\) -not -path '*/node_modules/*') 2>/dev/null | tail -50",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01LgbpfrUjePZDcvGn2Fwn9D",
+      "tool_input": {
+        "command": "node --version && node --test --experimental-test-coverage test/ 2>&1 | tail -40",
+        "description": "Run tests with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_017dhSmRfqv4XE17ouK4BqVs",
+      "tool_input": {
+        "command": "node --test --experimental-test-coverage /private<tmp>/skim-eval-skim-test-gaps-bGFnoH/reminder-service/test/",
+        "description": "Run tests with coverage report"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 20,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Biggest gap: nothing tests create → `tick` → deliver**, and it hides a real timezone bug. Ranked, most important first:\n\n1. **Timezone applied twice.** `api.js:8` already converts to UTC, then `scheduler.js:9` subtracts `tz_offset_min` again. IST reminders fire **5.5h early** and US Eastern (-300) fires **5h late**. Scheduler tests only use offset 0 (`scheduler.test.js:6`), so they can't catch it.\n2. **`tick()` has no tests** (`scheduler.js:12`). Nothing checks mark-as-sent, retry on the next tick, or no double send. Ticks can overlap (`:26`) and send the same reminder twice.\n3. **Search has zero tests** and builds SQL by string concatenation (`api.js:31`). A search for \"milk and eggs\" would throw, and a quote in the input is SQL injection once a real DB arrives.\n4. **The production formatter is untested.** `config.json:3` uses `legacy`, but tests only use `format`. Deleting `legacy.js`, as its own TODO says, would make every send fail with no test going red.\n5. **An invalid `at` is accepted.** It returns 201 with `due_ms = NaN`, and the reminder is never delivered (`api.js:16`).\n6. **Jitter is never exercised.** `retry.test.js:6` pins `Math.random` to 0.5. The first retry delay can go negative (200 − 500ms).\n\n**Not run:** the node commands needed approval, so I have no coverage numbers and haven't confirmed the current tests pass. You can run `node --test --experimental-test-coverage test/`.\n\n**One test covers 1, 2 and 4.** It fails today on the first assert:\n\n```js\ntest('IST reminder is delivered once, at 09:00 local', async () => {\n  reset();\n  handle({ method: 'POST', path: '/reminders',\n    body: { userId: 'u1', text: 'call mum', at: '2026-03-01T09:00', tzOffsetMin: 330 } });\n  const lines = [];\n  const opts = { formatter: config.formatter, out: (l) => lines.push(l) }; // config.json\n  await tick(Date.parse('2026-03-01T03:29:00Z'), opts);\n  assert.equal(lines.length, 0);\n  await tick(Date.parse('2026-03-01T03:30:00Z'), opts);\n  assert.equal(lines.length, 1);\n  await tick(Date.parse('2026-03-01T03:31:00Z'), opts);\n  assert.equal(lines.length, 1); // not sent twice\n});\n```\n\n**1. Which side is wrong.** `README.md:37` says `due_ms` is already a UTC epoch, and `toUtcMs` agrees. Only the comment at `scheduler.js:7` disagrees. So the fix is `r.due_ms <= nowMs` at `scheduler.js:9`, not a change to `toUtcMs`.\n\n**2. Duplicate sends.** Each failing send waits about **3s** in backoff (200+400+800+1600ms). During a notifier outage, about 10 failing reminders make one tick outlast the 30s interval. `setInterval` doesn't wait for the previous tick, so the next tick reads the same unsent rows. Meanwhile the old tick keeps working through its stale copy of the rows, so both ticks send them.\n- Testability: `tick` hardcodes `{ attempts: 5 }` (`scheduler.js:16`), so any failure-path test waits ~3s in real time. Use `mock.timers` from `node:test`, or let `tick` accept retry options.\n\n**3. Search.** The in-memory DB splits the WHERE clause on `AND` without regard to case (`db.js:29`), so \"milk and eggs\" would throw `unsupported condition`.\n- `handle` has no try/catch (`api.js:41`), so the error escapes instead of becoming a 4xx/5xx.\n- List and search also throw if `req.query` is missing (`api.js:25`, `:31`).\n- Once persistence moves to a real DB, `' OR '1'='1` returns every user's reminders.\n- Fix: `query('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q}%`])`.\n\n**4. Formatter.** An unknown or deleted formatter makes `import()` reject. Each reminder then retries 5 times per tick, every tick, forever. `index.js:6` doesn't check the formatter at startup.\n\n**Also:**\n- `DELETE /reminders/:id` has no ownership check (`api.js:36`), so any caller can delete any reminder.\n- `config.json` still uses `legacy`, though `format.js` is labeled the current format.\n- Surviving restarts (`README.md:16`) has no test, but it isn't built yet either.",
+  "ttft_ms": 1757,
+  "type": "result",
+  "duration_ms": 183707,
+  "uuid": "70cc16fa-cb1f-4173-bf9a-c18c4884dd05",
+  "ttft_stream_ms": 1070,
+  "time_to_request_ms": 22,
+  "first_content_frame_ms": 1070,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

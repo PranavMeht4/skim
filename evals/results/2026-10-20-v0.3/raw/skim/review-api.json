@@ -1,0 +1,159 @@
+{
+  "arm": "skim",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 145597,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 144091,
+  "stop_reason": "end_turn",
+  "session_id": "48fd4402-8b7b-49d8-bdea-0646e62ed3f5",
+  "total_cost_usd": 0.6600566000000001,
+  "usage": {
+    "input_tokens": 120,
+    "cache_creation_input_tokens": 37571,
+    "cache_read_input_tokens": 425843,
+    "output_tokens": 13692,
+    "output_tokens_details": {
+      "thinking_tokens": 8417
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37571,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 64,
+        "cache_read_input_tokens": 45244,
+        "cache_creation_input_tokens": 4378,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4378
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 100,
+        "output_tokens": 4905,
+        "cache_read_input_tokens": 49622,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 120,
+      "outputTokens": 13692,
+      "cacheReadInputTokens": 425843,
+      "cacheCreationInputTokens": 37571,
+      "webSearchRequests": 0,
+      "costUSD": 0.6600566000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 8417,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01K2T2QbbBEBVrohepeKmUAt",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -8 && cat > /tmp/probe-api.mjs <<'EOF'\nconst base = process.argv[2];\nconst { handle } = await import(base + '/src/api.js');\nconst { reset, queryLog } = await import(base + '/src/db.js');\nconst { dueReminders } = await import(base + '/src/scheduler.js');\nconst c = (body) => handle({ method: 'POST', path: '/reminders', body });\nconst show = (label, fn) => { try { console.log(label, JSON.stringify(fn())); } catch (e) { console.log(label, 'THROWS:', e.message); } };\n\nreset();\nc({ userId: 'alice', text: 'secret: bank pin 1234', at: '2026-03-01T09:00' });\nc({ userId: 'bob', text: 'gym', at: '2026-03-01T09:00' });\nshow('1 search injection (bob reads alice):', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: \"alice' AND text LIKE '%\", q: '' } }).body.map(r => r.user_id + ':' + r.text));\nshow('1b last SQL:', () => queryLog.at(-1).sql);\nshow('1c q with \" AND \" text:', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: 'bob', q: 'gym and swim' } }));\nshow('1d q=% wildcard:', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: 'bob', q: '%' } }).body.length);\nshow('2 bad at:', () => c({ userId: 'u', text: 't', at: 'tomorrow' }));\nshow('2b at with seconds:', () => c({ userId: 'u', text: 't', at: '2026-03-01T09:00:00' }).body.due_ms);\nshow('2c tz string:', () => c({ userId: 'u', text: 't', at: '2026-03-01T09:00', tzOffsetMin: 'abc' }).body);\nshow('3 list no query:', () => handle({ method: 'GET', path: '/reminders' }));\nshow('3b search no userId:', () => { handle({ method: 'GET', path: '/reminders/search', query: { q: 'x' } }); return queryLog.at(-1).sql; });\nshow('4 delete other user (bob deletes alice id 1):', () => handle({ method: 'DELETE', path: '/reminders/1' }).status);\n\n// scheduler double shift\nreset();\nconst r = c({ userId: 'in', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconst fireAt = [Date.parse('2026-02-28T22:00:00Z'), Date.parse('2026-03-01T03:30:00Z')];\nconsole.log('5 IST 09:00 reminder (should fire 03:30Z) due at 22:00Z prev day?', dueReminders([r], fireAt[0]).length === 1);\nEOF\nnode /tmp/probe-api.mjs \"$PWD\"",
+        "description": "Run tests, then probe api.js edge cases"
+      }
+    },
+    {
+      "tool_name": "Write",
+      "tool_use_id": "toolu_01VEMaVFm7PE2wPL7BA9n9my",
+      "tool_input": {
+        "file_path": "/tmp/probe-api.mjs",
+        "content": "const base = process.argv[2];\nconst { handle } = await import(base + '/src/api.js');\nconst { reset, queryLog } = await import(base + '/src/db.js');\nconst { dueReminders } = await import(base + '/src/scheduler.js');\nconst c = (body) => handle({ method: 'POST', path: '/reminders', body });\nconst show = (label, fn) => { try { console.log(label, JSON.stringify(fn())); } catch (e) { console.log(label, 'THROWS:', e.message); } };\n\nreset();\nc({ userId: 'alice', text: 'secret: bank pin 1234', at: '2026-03-01T09:00' });\nc({ userId: 'bob', text: 'gym', at: '2026-03-01T09:00' });\nshow('1 search injection (bob reads alice):', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: \"alice' AND text LIKE '%\", q: '' } }).body.map(r => r.user_id + ':' + r.text));\nshow('1b last SQL:', () => queryLog.at(-1).sql);\nshow('1c q with \" and \" text:', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: 'bob', q: 'gym and swim' } }));\nshow('1d q=% wildcard:', () => handle({ method: 'GET', path: '/reminders/search', query: { userId: 'bob', q: '%' } }).body.length);\nshow('2 bad at:', () => c({ userId: 'u', text: 't', at: 'tomorrow' }));\nshow('2b at with seconds:', () => c({ userId: 'u', text: 't', at: '2026-03-01T09:00:00' }).body.due_ms);\nshow('2c tz string:', () => c({ userId: 'u', text: 't', at: '2026-03-01T09:00', tzOffsetMin: 'abc' }).body);\nshow('3 list no query:', () => handle({ method: 'GET', path: '/reminders' }));\nshow('3b search no userId:', () => { handle({ method: 'GET', path: '/reminders/search', query: { q: 'x' } }); return queryLog.at(-1).sql; });\nshow('4 delete with no owner check:', () => handle({ method: 'DELETE', path: '/reminders/1' }).status);\n\nreset();\nconst r = c({ userId: 'in', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconsole.log('5 IST 09:00 (true UTC 03:30Z) due_ms =', new Date(r.due_ms).toISOString());\nconsole.log('5b scheduler says due at 22:00Z prev day?', dueReminders([r], Date.parse('2026-02-28T22:00:00Z')).length === 1);\n"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WE3z2BW78ELyTrd6D4biiV",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -8; node /tmp/probe-api.mjs \"$PWD\"",
+        "description": "Run tests, then probe api.js edge cases"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01CbDvzSsm3m7nzDbErEMHd1",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -8",
+        "description": "Run the test suite"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01GQF7vPgWVhpGemfD97hhQp",
+      "tool_input": {
+        "command": "node --test /private<tmp>/skim-eval-skim-review-api-h3CXwl/reminder-service/test/",
+        "description": "Run the test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 16,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**`api.js` has 5 real problems. 2 are security holes.**\n1. **SQL injection** in search: user input is pasted straight into the SQL string (`api.js:31`).\n2. **Delete has no owner check:** any caller can delete any reminder by id (`api.js:37`).\n3. **Bad input makes a reminder that never fires:** an invalid `at` or `tzOffsetMin` stores `due_ms: NaN` and still returns 201 (`api.js:13-16`).\n4. **A request with no `query` crashes** list and search with a TypeError (`api.js:25`, `:31`).\n5. **One fixed offset breaks across DST:** a reminder dated after a DST switch fires 1 hour off (`api.js:12`).\n\n**Also:**\n- **`scheduler.js:9` subtracts the offset a second time.** IST reminders fire **5h30m early** and New York ones 5h late. It isn't in `api.js`, but it's the worst bug I found. Fix: `r.due_ms <= nowMs`. The tests miss it because `scheduler.test.js:6` only uses offset 0.\n- Nothing calls `handle` except the tests. `index.js` only starts the scheduler.\n- **I couldn't run anything.** `node` and writing a probe script were both blocked by permissions. Every finding comes from reading `api.js`, `db.js`, `scheduler.js` and the README.\n\n**1. SQL injection.** With a real SQL database, `q = \"' OR 1=1 --\"` returns every user's reminders. The README says `db.js` must become persistent, so this goes live when it is swapped out. Even the in-memory `db.js` breaks today: `q = \"milk and eggs\"` gets split at `AND` (`db.js:29`) and throws `unsupported condition: text LIKE '%milk`. I traced that by hand and didn't execute it. Fix (`db.js` already accepts `?` with `LIKE`):\n```js\nquery('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q}%`])\n```\n\n**2. Delete.** Ids count up from 1 (`db.js:39`), so looping `DELETE /reminders/1…5000` wipes everyone's reminders. Fix: require `userId` and use `WHERE id = ? AND user_id = ?`. Every route also trusts a `userId` sent by the client, so list and search expose anyone's reminders too. That's only safe if a layer above sets `userId` from a login session, and I found no such layer.\n\n**3. Reminders that never fire.** A sure case is `tzOffsetMin: \"abc\"`, because `\"abc\" * 60_000` is NaN. `toUtcMs` also blindly appends `:00Z`, so `\"2026-03-01T09:00:00\"` becomes `…09:00:00:00Z`. The scheduler checks `NaN <= nowMs`, which is false, so the reminder is never sent and nothing is logged. Fix: return 400 unless `at` matches `^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$`, `tzOffsetMin` is an integer from -720 to 840, and `Number.isFinite(dueMs)`.\n\n**4. Missing query.** `handle({ method: 'GET', path: '/reminders' })` throws `Cannot read properties of undefined (reading 'userId')`. With no `userId`, list quietly returns `[]` and search looks up the user `'undefined'`. Fix: default to `query: q = {}` and return 400 when `userId` is missing.\n\n**5. DST.** Say a New York user creates a reminder in February (offset −300) for 09:00 on 2026-04-01. NY is on EDT (−240) by then, so it fires at 10:00 local. The current code is only right if the client sends the offset for the reminder's date, not for today. IST has no DST, so this only affects users in DST zones. Fix: accept an IANA zone such as `America/New_York` and work out the offset for that date.\n\n**Checked and fine:** the sign in `toUtcMs` matches the README and `api.test.js:11-13`. `removed ? 204 : 404` works because `db.js` returns a count.",
+  "ttft_ms": 3273,
+  "type": "result",
+  "duration_ms": 144270,
+  "uuid": "57937fb5-e433-435a-b44a-d68e32491781",
+  "ttft_stream_ms": 2390,
+  "time_to_request_ms": 28,
+  "first_content_frame_ms": 2390,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,132 @@
+{
+  "arm": "default",
+  "case": "compare-storage",
+  "kind": "read",
+  "prompt": "Reminders are lost when the process restarts. Compare realistic ways to make storage persistent and recommend one.",
+  "wall_ms": 200383,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 198539,
+  "stop_reason": "end_turn",
+  "session_id": "21506354-90ec-41d2-b737-300b29f8385e",
+  "total_cost_usd": 0.8871384000000001,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 36548,
+    "cache_read_input_tokens": 403787,
+    "output_tokens": 8952,
+    "output_tokens_details": {
+      "thinking_tokens": 5317
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35163,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2721,
+        "cache_read_input_tokens": 44900,
+        "cache_creation_input_tokens": 2305,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2305
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 43268,
+      "outputTokens": 17254,
+      "cacheReadInputTokens": 403787,
+      "cacheCreationInputTokens": 36548,
+      "webSearchRequests": 0,
+      "costUSD": 0.8871384000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5317,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01XL7oehAEFLC9QWp81kdD3v",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100 && echo --- && wc -l $(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -50) 2>/dev/null | tail -1",
+        "description": "List project files and total line count"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01KfJpyD2uRQBYVopReX2N1v",
+      "tool_input": {
+        "command": "node --version; node -e \"const {DatabaseSync}=require('node:sqlite'); const d=new DatabaseSync(':memory:'); console.log('sqlite', d.prepare('select sqlite_version() v').get().v)\" 2>&1",
+        "description": "Check Node version and built-in SQLite availability"
+      }
+    },
+    {
+      "tool_name": "WebSearch",
+      "tool_use_id": "toolu_01C6rCkbkXwVR9poi424kaRM",
+      "tool_input": {
+        "query": "node:sqlite stability index release candidate Node.js 24 25 DatabaseSync",
+        "mode": "standard"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 19,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I recommend **SQLite through Node's built-in `node:sqlite` module**, with the runtime moved to a current Node LTS (24). If the VM has to stay on Node 20, use a JSON file that is rewritten safely on every change instead. Nothing is changed yet; this is the comparison.\n\n## What the README already decides\n\nOne process, under 5,000 reminders, no new infrastructure, no dependencies. That rules out Postgres, Redis or a queue: they're a new server to run with no benefit at this size. Four options are left:\n\n| Option | Runs on Node 20? | New dependency? | Survives a crash mid-write? | Work needed |\n|---|---|---|---|---|\n| **A. JSON file**, rewritten on each change | Yes | No | Only if done carefully (write a temp file, fsync it, rename it over the old one) | Small. The home-made SQL matcher in `db.js` stays |\n| **B. `node:sqlite`** (built in) | **No**, needs Node 22.13+ (24 is best) | No | Yes, SQLite handles it | Small. `db.js` shrinks to about 30 lines and the matcher is deleted |\n| **C. `better-sqlite3`** | Yes | Yes, a compiled native package | Yes | Small |\n| **D. Log of changes, replayed on startup** | Yes | No | Yes, if done well | More than A for no gain at this size. Rejected |\n\n## Why B\n\n- **The code already speaks SQL.** `api.js` and `scheduler.js` send parameterized SQL through `query(sql, params)`, and `db.js:1` calls itself a \"stand-in for a SQL database\". With real SQLite, those statements mostly just run (the insert needs `RETURNING *`).\n- **SQLite gets crash-safety right.** With A, safe saving, keeping the next id across restarts, and recovering from a half-written file are all mine to write and test.\n- **No dependency.** C gives the same engine but brings a compiled native package, which breaks the \"no dependencies\" rule.\n- **The Node upgrade is probably due anyway.** I believe Node 20 reached end-of-life on 2026-04-30, so needing Node 22+ shouldn't count against B. I couldn't confirm the date here (web search was blocked).\n- **The catch:** the last I knew, `node:sqlite` was still marked experimental and printed a warning at startup. I couldn't check its current status. The risk is limited: the engine underneath is standard SQLite, and the Node-side calls are confined to `db.js`.\n\n**When to pick A instead:** if the VM can't leave Node 20. Prefer A over C there, since it keeps the no-dependency rule.\n\n## Things to fix in the same change\n\n1. **Search is open to SQL injection** (`api.js:30-31`). It glues `userId` and `q` straight into the SQL text. The fake database limits the damage today, but with real SQLite a search like `' OR '1'='1` would return every user's reminders. The fix: `WHERE user_id = ? AND text LIKE '%' || ? || '%'`.\n2. **Tests need their own database.** `api.test.js` calls `reset()` before each test. The database file path should be configurable, so tests use an in-memory or temporary database and never touch the real file.\n3. **Delivery becomes \"at least once\".** If the process dies after sending a reminder but before marking it sent, it is sent again after the restart. Reminders that came due while the service was down all go out on the first check after it starts. A related existing risk: `setInterval` doesn't wait for the previous check to finish, so a check slowed by retries can overlap the next one and send the same reminder twice. That's worth guarding once a backlog after restart is possible.\n4. **Raise `engines`** in `package.json` to match the new Node version.\n\n**A separate bug I noticed:** `scheduler.js:9` subtracts the timezone offset again, even though `api.js` already stored `due_ms` in UTC. So reminders fire 5.5 hours early for India and several hours late for the US. Tests miss it because they only use offset 0. It's not a storage problem, but it's a one-line fix.\n\nI'd like to implement B, including the search fix and a test that restarts the database and checks the reminders are still there. One question first: which Node version does the VM run, or can it move to 24?",
+  "ttft_ms": 2283,
+  "type": "result",
+  "duration_ms": 199108,
+  "uuid": "8b65d36a-f624-4459-a9c4-75a07062a7f3",
+  "ttft_stream_ms": 2168,
+  "time_to_request_ms": 40,
+  "first_content_frame_ms": 2168,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

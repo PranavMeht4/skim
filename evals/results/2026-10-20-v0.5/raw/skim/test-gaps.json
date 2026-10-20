@@ -1,0 +1,155 @@
+{
+  "arm": "skim",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 168978,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 167598,
+  "stop_reason": "end_turn",
+  "session_id": "f69c3f25-3e96-42a0-8140-b170ca89717e",
+  "total_cost_usd": 0.8108664000000001,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 35043,
+    "cache_read_input_tokens": 279992,
+    "output_tokens": 9213,
+    "output_tokens_details": {
+      "thinking_tokens": 5159
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 33783,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 70,
+        "cache_read_input_tokens": 45618,
+        "cache_creation_input_tokens": 216,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 216
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 44200,
+        "output_tokens": 5859,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 3568,
+        "cache_read_input_tokens": 45834,
+        "cache_creation_input_tokens": 1260,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1260,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 44216,
+      "outputTokens": 15072,
+      "cacheReadInputTokens": 279992,
+      "cacheCreationInputTokens": 35043,
+      "webSearchRequests": 0,
+      "costUSD": 0.8108664000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5159,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01CgBhN1MFRzzGAX87UtcNfW",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100 && echo --- && wc -l $(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' \\( -name '*.js' -o -name '*.ts' -o -name '*.py' -o -name '*.json' -o -name '*.md' \\)) 2>/dev/null | tail -50",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01UVot7ecS3aQzUmh5n3bCni",
+      "tool_input": {
+        "command": "node --version && node --test test/ 2>&1 | tail -15",
+        "description": "Run the existing test suite"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01EiDSWwA3rX4uTyt5rKe4Dr",
+      "tool_input": {
+        "command": "node --test <tmp>/skim-eval-skim-test-gaps-Fxn5Rm/reminder-service/test/",
+        "description": "Run the existing test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 20,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**The gap that matters most: no test uses a non-zero timezone offset, and that hides a real delivery-time bug.** I couldn't run the suite (approval was denied), so everything below comes from reading the code.\n\n1. **The timezone is applied twice** (`scheduler.js:9`). IST users get reminders **5.5h early** and US-Eastern users **5h late**. The only scheduler test fixture uses `tz_offset_min: 0` (`scheduler.test.js:6`).\n2. **`/reminders/search` has zero tests.** Searching `\"milk and eggs\"` **throws**. It also builds SQL by **string concatenation** (`api.js:31`).\n3. **`tick()` has zero tests.** Overlapping ticks can **send a reminder twice**, and a reminder that always fails is retried **forever** (`scheduler.js:12-27`).\n4. **The formatter that runs in production is untested.** `config.json` and `send`'s default both use `legacy`, but the test covers only `format` (`notify.test.js:8`).\n5. **There are no input-validation tests.** A malformed `at` makes `due_ms` `NaN`, so the reminder is accepted and then **never fires**.\n\n## 1. Timezone applied twice\n```flow\napi.js:8 toUtcMs: 09:00 IST -> due_ms = 03:30Z (already UTC, per README.md:37)\nscheduler.js:9 subtracts tz_offset_min again -> fires at 22:00Z the day before = 03:30 IST\n```\n- With offset 0 the bug has no effect, so every current test passes. The bug sits between two modules that are each tested only on their own.\n- **Missing test:** create a reminder with `tzOffsetMin: 330`, `at: '…T09:00'`. Then check `dueReminders` returns nothing at 03:29Z and returns it at 03:30Z.\n- **Fix:** remove `- r.tz_offset_min * 60_000` at `scheduler.js:9`, and correct the comment on line 7.\n\n## 2. Search: no tests at all\n- The search builds `… AND text LIKE '%milk and eggs%'`. `db.js:29` splits it on `AND`, which leaves `text LIKE '%milk`. `matcher` then throws `unsupported condition`, and `handle` doesn't catch it.\n- The string-built SQL becomes **real injection** once a real database replaces the stand-in, which `README.md:16` says is needed.\n- **Missing tests:** a search term containing \"and\", an apostrophe (`mum's`), and a `'` in `userId`.\n\n## 3. `tick()`: only the pure filter is tested\n- Each failing reminder spends about **3s** in backoff (5 attempts, run one after another). About **10 failing reminders** fill the 30s interval.\n- `setInterval` doesn't wait for the previous tick to finish. The overlapping tick reads the same `sent = 0` rows, so those reminders go out **twice**.\n- There's no cap on retries across ticks and no dead-letter handling.\n- **Missing tests:**\n  - A successful send marks the reminder `sent`.\n  - A failed send leaves it unsent.\n  - Two concurrent `tick()` calls send each reminder once.\n\n## 4. Legacy formatter\n- `legacy.js:2` says *\"TODO: remove\"*. Deleting that file would break production while the tests stay green.\n- A `|` in the reminder text corrupts the pipe-delimited output.\n- No test checks what happens when the formatter name is unknown.\n\n## 5. Input validation\n- An `at` value with seconds (`2026-03-01T09:00:00`) becomes `…:00:00Z`, which parses to `NaN`. The API still returns **201**, and `NaN <= now` is never true, so the reminder never fires.\n- The only validation test checks a missing field (`api.test.js:23`).\n\n**Also:**\n- `backoffDelay` has no direct test, and the tests pin `Math.random` to 0.5, so jitter is never exercised. Jitter is a fixed ±500ms (`retry.js:8`), so attempt 0 can come out negative and the delay can go over `maxDelayMs` by 500ms.\n- `GET /reminders` and `/reminders/search` throw a `TypeError` when `query` is missing (`api.js:25`, `api.js:31`).\n- `DELETE` has no ownership check (`api.js:37`). It's untested, but the service has no auth model at all.\n- `db.js`, `index.js` and `startScheduler` have no direct tests. If `tickSeconds` is missing from config, the interval becomes `NaN` and Node runs it **every 1ms**.\n- Not surviving a restart (`README.md:16`) is a missing feature, not a test gap.",
+  "ttft_ms": 2643,
+  "type": "result",
+  "duration_ms": 167716,
+  "uuid": "5afa1e42-0398-4d9b-900b-8f0d83d9cc55",
+  "ttft_stream_ms": 2473,
+  "time_to_request_ms": 31,
+  "first_content_frame_ms": 2473,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

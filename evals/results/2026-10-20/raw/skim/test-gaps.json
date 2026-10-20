@@ -1,0 +1,155 @@
+{
+  "arm": "skim",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 216798,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 215221,
+  "stop_reason": "end_turn",
+  "session_id": "b42f8847-0593-4a85-b31e-e85bf4d4efa1",
+  "total_cost_usd": 0.9986194,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 40705,
+    "cache_read_input_tokens": 288282,
+    "output_tokens": 15064,
+    "output_tokens_details": {
+      "thinking_tokens": 10842
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 36022,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3829,
+        "cache_read_input_tokens": 47875,
+        "cache_creation_input_tokens": 198,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 198
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 49072,
+        "output_tokens": 6587,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 4581,
+        "cache_read_input_tokens": 48073,
+        "cache_creation_input_tokens": 4683,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 4683,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 49088,
+      "outputTokens": 21651,
+      "cacheReadInputTokens": 288282,
+      "cacheCreationInputTokens": 40705,
+      "webSearchRequests": 0,
+      "costUSD": 0.9986194,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 10842,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01YF5fnYPJDKK9YGHx1cXRYS",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/__pycache__/*' | head -100 && wc -l $(find . -type f -name '*.py' -o -type f -name '*.ts' -o -type f -name '*.js' | grep -v node_modules)",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01TagQRByJfS8sx6E2tNiB5o",
+      "tool_input": {
+        "command": "node --version && node --test --experimental-test-coverage test/ 2>&1 | tail -40",
+        "description": "Run test suite with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_0166nrcrE1ZztQWkzetNYEwW",
+      "tool_input": {
+        "command": "node --test --experimental-test-coverage /private<tmp>/skim-eval-skim-test-gaps-NvwwMB/reminder-service/test/",
+        "description": "Run test suite with coverage report"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 20,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**The gap that matters most hides a live bug. No test goes from \"create\" to \"due\", so every reminder from a non-UTC user fires at the wrong time.**\n\nI couldn't run the tests: `node --test` needed approval, and this session is non-interactive. So there are no coverage numbers, and every finding below comes from reading the code. To get coverage yourself, run `node --test --experimental-test-coverage test/`.\n\n| # | Gap | Impact |\n|---|---|---|\n| 1 | tz offset from api to scheduler | ✗ **live bug**: IST fires 5h30m early |\n| 2 | `/reminders/search` has **0 tests** | throws on \"and\"; SQL injection later |\n| 3 | bad `at` / `tzOffsetMin` input | returns 201, then **never fires** |\n| 4 | `tick()` has **0 tests** | latent duplicate sends |\n| 5 | `legacy` formatter (the one prod uses) | untested; `\\|` in text breaks fields |\n| 6 | `backoffDelay` / jitter | stubbed out in every test |\n\n## 1. Timezone shift is applied twice\n\n```\nuser picks 09:00 IST (offset 330)\napi.js:8        due_ms = 03:30Z              ✓ UTC, as README.md:37 says\nscheduler.js:9  due_ms - 330 min = 22:00Z the day before\n                ─► fires at 03:30 IST, 5h30m early\noffset -300 (US East) ─► fires 5h late\n```\n\n- **Cause:** the comment at `scheduler.js:7` says `due_ms` is wall-clock time. `README.md:37` and `api.js:8` say it is UTC.\n- **Why tests pass:** `api.test.js:12` checks `toUtcMs` with 330 ✓. `scheduler.test.js:6` fixes the offset at **0**, so the second shift does nothing. No test spans both modules.\n- **Fix:** change `scheduler.js:9` to `r.due_ms <= nowMs`.\n- **Test to add:** create a reminder via `handle()` with `tzOffsetMin: 330`. At 03:29Z it should not be due; at 03:30Z it should be.\n\n## 2. Search builds SQL by string concatenation (`api.js:31`)\n\n- **Today:** the fake DB splits WHERE on `/\\s+AND\\s+/i` (`db.js:29`). So searching \"bread and milk\" (in any case) should make `handle()` throw:\n  ```\n  unsupported condition: text LIKE '%bread\n  ```\n- `index.js` never calls `handle()`, so the running service can't crash from this yet.\n- **Later:** `README.md:16` requires the data to survive restarts, so `db.js` will become a real DB. Then `q` and `userId` can carry arbitrary SQL.\n- **Test to add:** search text containing \"and\" and `'`. Assert through `queryLog` (`db.js:8`) that search uses `?` params. `queryLog` exists for tests, but no test uses it.\n\n## 3. Bad input is accepted and then silently lost\n\n`createReminder` only checks that fields are present (`api.js:13`).\n- `at: \"9am\"` gives `Date.parse(\"9am:00Z\")` = NaN, so `due_ms` is NaN. The API returns 201, but `NaN <= now` is **never** true, so the reminder never fires.\n- `tzOffsetMin: \"+05:30\"` also gives NaN, with the same result.\n- A missing `tzOffsetMin` silently defaults to UTC.\n- Unverified: ISO strings with seconds or a trailing `Z` probably also give NaN, because the code appends `:00Z`.\n\n## 4. `tick()` has no tests\n\n- Untested: marking a reminder sent on success, leaving it unsent on failure, and the retry path.\n- **Latent duplicate sends:** `setInterval` (`scheduler.js:26`) doesn't wait for the async tick.\n  - Each permanently failing send spends about 3s in backoff (200+400+800+1600ms).\n  - About 10 failures make one tick last over 30s.\n  - The next tick then re-reads rows that are still unsent and sends them again.\n- Today `send` is `console.log`, so this only bites once a real network sender lands.\n- A reminder that always fails is retried every tick, forever.\n\n## 5. The production formatter is untested\n\n- Prod uses `legacy` (`config.json:3`; it's also the default at `notify.js:14`). `notify.test.js:8` tests only `format`.\n- `legacy.js:4` joins fields with `|`. A text like \"milk | eggs\", or one with a newline, adds fields for whatever parses the output.\n- A typo in the formatter name in `config.json` makes every send fail on every tick. The only sign is `console.error`, and there is no startup check.\n\n## 6. Retry jitter is never exercised\n\n- `retry.test.js:6` stubs `Math.random = 0.5`, so jitter is always 0.\n- `backoffDelay` and its `maxDelayMs` cap have no direct tests.\n- Jitter is a fixed ±500ms (`retry.js:4`) against a 200ms base, so the first retry delay ranges from −300ms to 700ms. The impact is low.\n\n❓ **Needs you:** should I fix `scheduler.js:9` and add tests for #1–3? The other option is tests only, so you see #1 fail first.",
+  "ttft_ms": 1604,
+  "type": "result",
+  "duration_ms": 215519,
+  "uuid": "72576025-3037-43cb-9b79-f72bf8589345",
+  "ttft_stream_ms": 974,
+  "time_to_request_ms": 214,
+  "first_content_frame_ms": 974,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

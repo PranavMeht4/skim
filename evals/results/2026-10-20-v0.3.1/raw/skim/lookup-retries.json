@@ -1,0 +1,107 @@
+{
+  "arm": "skim",
+  "case": "lookup-retries",
+  "kind": "read",
+  "prompt": "How many times does the service try to send a reminder before giving up, and where is that set?",
+  "wall_ms": 37620,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 34544,
+  "stop_reason": "end_turn",
+  "session_id": "f7754c90-a362-4703-bbf9-0d78681f87be",
+  "total_cost_usd": 0.27956919999999996,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 26206,
+    "cache_read_input_tokens": 153506,
+    "output_tokens": 1959,
+    "output_tokens_details": {
+      "thinking_tokens": 763
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26206,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 542,
+        "cache_read_input_tokens": 37699,
+        "cache_creation_input_tokens": 558,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 558
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1959,
+      "cacheReadInputTokens": 153506,
+      "cacheCreationInputTokens": 26206,
+      "webSearchRequests": 0,
+      "costUSD": 0.27956919999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 763,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**5 attempts per tick**, hardcoded at `src/scheduler.js:16` (`withRetry(..., { attempts: 5 })`).\n\n- That overrides the **default of 3** in `src/retry.js:14`.\n- It is **not in `config.json`**. You can only change it in code.\n- Between attempts it waits about **200, 400, 800 and 1600 ms**, each ±500 ms of jitter (`src/retry.js:6-9`). One tick's retries finish in about **3 s**.\n- It **never gives up for good.** After 5 failures it logs `reminder <id> failed: …` and leaves `sent = 0` (`src/scheduler.js:18-20`). The next tick tries 5 more times.\n- Ticks run every **30 s**, from `tickSeconds` in `config.json:2` (passed in at `src/index.js:6`). So a reminder that always fails is retried and logged forever.\n\n**Also:** the jitter (±500 ms) is bigger than the first two delays. The first wait can come out negative, which `setTimeout` runs as about 0 ms (`src/retry.js:8`).",
+  "ttft_ms": 5342,
+  "type": "result",
+  "duration_ms": 34630,
+  "uuid": "1eafe4a4-db7a-443c-98f8-ce8c458610c4",
+  "ttft_stream_ms": 5057,
+  "time_to_request_ms": 41,
+  "first_content_frame_ms": 5057,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

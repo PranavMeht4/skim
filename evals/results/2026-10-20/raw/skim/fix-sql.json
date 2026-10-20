@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "fix-sql",
+  "kind": "fix",
+  "prompt": "The search endpoint in src/api.js builds its SQL by string concatenation. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 114917,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 113086,
+  "stop_reason": "end_turn",
+  "session_id": "1b5ccda0-ea6c-4bea-adfb-752a668b8b2f",
+  "total_cost_usd": 0.7218048000000001,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 35650,
+    "cache_read_input_tokens": 291224,
+    "output_tokens": 6458,
+    "output_tokens_details": {
+      "thinking_tokens": 3225
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34710,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 705,
+        "cache_read_input_tokens": 45770,
+        "cache_creation_input_tokens": 991,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 991
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 41515,
+      "outputTokens": 10756,
+      "cacheReadInputTokens": 291224,
+      "cacheCreationInputTokens": 35650,
+      "webSearchRequests": 0,
+      "costUSD": 0.7218048000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3225,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Fixed the SQL injection in search. `node --test test/` now passes 14/14** (it was 11/11 before, and I added 3 tests).\n\n**Cause:** `searchReminders` pasted `q.userId` and `q.q` straight into the SQL string at `src/api.js:31`.\n**Fix:** it now uses bound parameters:\n```js\nquery('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q}%`])\n```\n**Proof:** I ran the new tests against the old code first, and 2 of them failed:\n```\nnot ok 6 - search treats SQL keywords in the search text as plain text\n  error: \"unsupported condition: text LIKE '%milk\"\nnot ok 7 - search passes user input as bound parameters, never in the SQL\n```\nAfter the fix, all 14 tests pass.\n\n| File | Change |\n|---|---|\n| `src/api.js:29-35` | Search query now uses `?` placeholders |\n| `test/api.test.js` | 3 new tests: search filters by user and text; the word \"and\" in the search text no longer breaks the query; user input goes into `params` and never into the SQL string (checked via `queryLog`) |\n\n`scheduler.js` and the other handlers in `api.js` already used static SQL or `?` placeholders, so nothing else needed changing.\n\n⚠ **Risk:**\n- **`%` and `_` in a search term** still act as LIKE wildcards. This can't inject SQL, but a search for `%` matches all of that user's reminders. I didn't add `ESCAPE` because the fake db's parser in `src/db.js:17` rejects it.\n- **A missing `q`** still searches for the literal text `%undefined%`. That was already true before this change, and I left it alone.",
+  "ttft_ms": 1646,
+  "type": "result",
+  "duration_ms": 113781,
+  "uuid": "4a44e22e-60b2-4c4e-8f80-203f7a1d1eda",
+  "ttft_stream_ms": 996,
+  "time_to_request_ms": 22,
+  "first_content_frame_ms": 996,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 14,
+      "pass": 14,
+      "fail": 0
+    }
+  }
+}

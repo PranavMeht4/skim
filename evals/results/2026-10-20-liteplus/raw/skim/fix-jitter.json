@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 39398,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 35803,
+  "stop_reason": "end_turn",
+  "session_id": "c565900f-29ac-44eb-bcf3-930fe7516969",
+  "total_cost_usd": 0.288056,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 25995,
+    "cache_read_input_tokens": 148980,
+    "output_tokens": 2513,
+    "output_tokens_details": {
+      "thinking_tokens": 527
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25995,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 492,
+        "cache_read_input_tokens": 36627,
+        "cache_creation_input_tokens": 1419,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1419
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2513,
+      "cacheReadInputTokens": 148980,
+      "cacheCreationInputTokens": 25995,
+      "webSearchRequests": 0,
+      "costUSD": 0.288056,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 527,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Fixed: `backoffDelay` now clamps the delay to `[0, maxDelayMs]`. `node --test test/` passes all 14 tests, 0 failing.**\n\n1. **Fix** at `src/retry.js:10`: `return Math.min(maxDelayMs, Math.max(0, exp + jitter));`\n2. **3 new tests** in `test/retry.test.js`:\n   - lowest jitter (`Math.random → 0`, `baseMs: 1`) gives **exactly 0**. The old code returned **-499**.\n   - highest jitter on a capped attempt gives **exactly 10,000**. The old code returned about **10,500**.\n   - a sweep over 7 random values × 12 attempts stays **within bounds**.\n3. I didn't run the new tests against the old code. The comparison in item 2 is from working through the old formula by hand.\n\n**Trade-off:** once the delay reaches the cap, about **half of retries land exactly on `maxDelayMs`**, so jitter only spreads them below the cap. If that matters, the alternative is to shrink the jitter near the bounds instead of clipping it.",
+  "ttft_ms": 3886,
+  "type": "result",
+  "duration_ms": 36459,
+  "uuid": "a7ab0bb5-d49a-4253-9c6d-105a40c4710f",
+  "ttft_stream_ms": 2604,
+  "time_to_request_ms": 32,
+  "first_content_frame_ms": 2604,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 14,
+      "pass": 14,
+      "fail": 0
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "arm": "default",
+  "case": "bug-timezone",
+  "kind": "read",
+  "prompt": "Users in India (UTC+5:30) say their reminders arrive about 5 hours before the time they set. UTC users are fine. What is causing it?",
+  "wall_ms": 42611,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 41182,
+  "stop_reason": "end_turn",
+  "session_id": "bb39051f-543e-48c5-a201-854090dcb96b",
+  "total_cost_usd": 0.33055359999999995,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 28179,
+    "cache_read_input_tokens": 179568,
+    "output_tokens": 3458,
+    "output_tokens_details": {
+      "thinking_tokens": 760
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28179,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1220,
+        "cache_read_input_tokens": 38886,
+        "cache_creation_input_tokens": 1335,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1335
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3458,
+      "cacheReadInputTokens": 179568,
+      "cacheCreationInputTokens": 28179,
+      "webSearchRequests": 0,
+      "costUSD": 0.33055359999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 760,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_014aPU5yyr6KDCrTVa8SuKSr",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100 && wc -l $(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100) | tail -1",
+        "description": "List project files and total line count"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01EozMbbGWXEviB3W7d9aGdh",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nconst base = '/private<tmp>/skim-eval-default-bug-timezone-dAvxJk/reminder-service/src/';\nconst { handle } = await import(base + 'api.js');\nconst { dueReminders } = await import(base + 'scheduler.js');\nconst { query } = await import(base + 'db.js');\nhandle({ method: 'POST', path: '/reminders', body: { userId: 'in', text: 'IST 09:00', at: '2026-03-01T09:00', tzOffsetMin: 330 } });\nhandle({ method: 'POST', path: '/reminders', body: { userId: 'utc', text: 'UTC 09:00', at: '2026-03-01T09:00', tzOffsetMin: 0 } });\nconst rows = query('SELECT * FROM reminders WHERE sent = 0');\nfor (const r of rows) {\n  // find the first minute at which the scheduler considers it due\n  let t = Date.parse('2026-02-28T00:00:00Z');\n  while (dueReminders([r], t).length === 0) t += 60_000;\n  console.log(r.text.padEnd(10), 'stored due_ms =', new Date(r.due_ms).toISOString(), '| scheduler fires at', new Date(t).toISOString());\n}\n\"; cd /private<tmp>/skim-eval-default-bug-timezone-dAvxJk/reminder-service && node --test 2>&1 | tail -8",
+        "description": "Simulate IST and UTC reminders, then run test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The time zone offset is applied twice: once when the reminder is saved, and again when the scheduler checks whether it's due.\n\n**1. When a reminder is saved, it's converted to UTC.** In `src/api.js:7-9`:\n```js\nexport function toUtcMs(at, tzOffsetMin) {\n  return Date.parse(`${at}:00Z`) - tzOffsetMin * 60_000;\n}\n```\nFor an India user setting 09:00 (offset 330 minutes), this gives 03:30 UTC. That's correct, and `test/api.test.js:12` checks for exactly that value. It's then stored as `due_ms` (`src/api.js:16-19`).\n\n**2. The scheduler subtracts the offset again.** In `src/scheduler.js:7-9`:\n```js\n// due_ms is the user's wall-clock time, so shift it back to UTC with their offset.\n...r.due_ms - r.tz_offset_min * 60_000 <= nowMs\n```\nThe comment is wrong: `due_ms` is already UTC, not the user's local time. So the reminder fires at 03:30 − 5h30m = 22:00 UTC the day before, which is 03:30 in India, 5½ hours early. That's the \"about 5 hours\" users are reporting.\n\n**Why only some users are affected:** UTC users have an offset of 0, so subtracting it twice changes nothing. Anyone with a non-zero offset is off by their full offset. Users west of UTC get theirs late: someone on US Eastern (−300) gets a reminder 5 hours late.\n\n**Why the tests pass:** every scheduler test and every API create test uses an offset of 0, so nothing exercises the double subtraction.\n\n**The fix** is to compare the stored UTC time directly in `src/scheduler.js:9`:\n```js\nreturn reminders.filter((r) => !r.sent && r.due_ms <= nowMs);\n```\nAlso correct the comment on line 7, and add a scheduler test with `tz_offset_min: 330` so this can't come back.\n\nI traced this by reading the code. The script I tried to run to simulate an India and a UTC reminder through the API and scheduler was declined, so I haven't executed anything or changed any files. I can make the fix and add the test if you'd like.",
+  "ttft_ms": 2892,
+  "type": "result",
+  "duration_ms": 41332,
+  "uuid": "eecc8331-d323-4c29-be89-277fbf05514c",
+  "ttft_stream_ms": 2429,
+  "time_to_request_ms": 116,
+  "first_content_frame_ms": 2430,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "safe-delete-legacy",
+  "kind": "read",
+  "prompt": "Is it safe to delete src/legacy.js?",
+  "wall_ms": 38206,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 36423,
+  "stop_reason": "end_turn",
+  "session_id": "d55ae775-0b8a-4298-9396-78acd7c4ff1e",
+  "total_cost_usd": 0.2950134,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 26256,
+    "cache_read_input_tokens": 182787,
+    "output_tokens": 2418,
+    "output_tokens_details": {
+      "thinking_tokens": 352
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26256,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 775,
+        "cache_read_input_tokens": 36977,
+        "cache_creation_input_tokens": 1330,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1330
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2418,
+      "cacheReadInputTokens": 182787,
+      "cacheCreationInputTokens": 26256,
+      "webSearchRequests": 0,
+      "costUSD": 0.2950134,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 352,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01AAw6QSNUAK7ofAb4xsSgcj",
+      "tool_input": {
+        "command": "for f in src/notify.js config.json src/index.js src/format.js src/scheduler.js src/api.js test/notify.test.js package.json README.md; do echo \"=== $f\"; cat -n $f; done",
+        "description": "Show notify, config, entry point, tests and README"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**No. Production still uses it, through a dynamic import that grep can't see.**\n- **Live config:** `config.json` sets `\"formatter\": \"legacy\"` (config.json:3)\n- **Loaded by name:** `notify.js` runs `import(\\`./${name}.js\\`)`, so no static import shows up (src/notify.js:8)\n- **Default too:** `send()` falls back to `'legacy'` when no formatter is passed (src/notify.js:14)\n- **Silent break:** if you delete it, every send throws and gets caught, so no reminder is ever sent\n- **Tests won't catch it:** the only notify test uses `formatter: 'format'` (test/notify.test.js:8)\n\n───\n\n**What happens if you delete it now**\n\n```\nindex.js → startScheduler({ formatter: \"legacy\" })\n  → tick → withRetry(send, 5 attempts)\n    → import(\"./legacy.js\") fails ×5 (backoff ~0.2s → 3.2s)\n      → catch logs \"reminder <id> failed: Cannot find module ...\"\n        → row stays sent = 0 → retried on every tick, forever\n```\n\nThe process stays up and the only symptom is error lines in the log. No reminders go out.\n\n**To remove it safely**\n1. Change `config.json:3` to `\"formatter\": \"format\"`.\n2. Change the default at `src/notify.js:14` to `'format'`.\n3. Delete `src/legacy.js` and its line in `README.md:28`.\n\n**Not verified:** the file's TODO says \"remove once everyone is on the new format.\" That points to downstream consumers that parse the pipe-delimited `REMIND|user|at|text` string. Nothing in this repo shows who they are or whether they've moved to the new format. Check with them before switching the config.",
+  "ttft_ms": 4780,
+  "type": "result",
+  "duration_ms": 37006,
+  "uuid": "76697b49-a2d2-466e-8c38-5418ad044c53",
+  "ttft_stream_ms": 4431,
+  "time_to_request_ms": 22,
+  "first_content_frame_ms": 4431,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

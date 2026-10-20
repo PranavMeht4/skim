@@ -1,0 +1,128 @@
+{
+  "_note": "Ground truth was written from the fixture source, not from any model answer. Facts are atomic; the judge marks each present or absent.",
+  "read": [
+    {
+      "id": "lookup-retries",
+      "type": "simple lookup",
+      "prompt": "How many times does the service try to send a reminder before giving up, and where is that set?",
+      "mustHave": [
+        "The number is 5 attempts (attempts: 5)",
+        "It is set in src/scheduler.js, in tick(), on the withRetry call",
+        "src/retry.js has its own default of 3 attempts, which the scheduler overrides"
+      ]
+    },
+    {
+      "id": "flow-create-to-delivery",
+      "type": "explain flow",
+      "prompt": "Walk me through what happens from the moment a user creates a reminder until it is delivered.",
+      "mustHave": [
+        "api.js converts the user's local time to a UTC timestamp (toUtcMs) on create and stores the row through db.js",
+        "scheduler.js tick() runs on a timer (every 30 seconds) and picks the unsent reminders that are due",
+        "Delivery goes through withRetry (retry.js) and notify.js, which loads the formatter named in config.json",
+        "A reminder is marked sent only after a successful send; if all retries fail it stays unsent and is tried again on the next tick"
+      ]
+    },
+    {
+      "id": "bug-timezone",
+      "type": "bug cause",
+      "prompt": "Users in India (UTC+5:30) say their reminders arrive about 5 hours before the time they set. UTC users are fine. What is causing it?",
+      "mustHave": [
+        "The offset is applied twice: api.js toUtcMs already converts to UTC, and scheduler.js dueReminders subtracts tz_offset_min again",
+        "The faulty line is in dueReminders in src/scheduler.js",
+        "East-of-UTC users get reminders early by their offset (5h30m for IST), and west-of-UTC users get them late",
+        "The existing tests miss it because the scheduler tests only use a UTC offset of 0"
+      ]
+    },
+    {
+      "id": "compare-storage",
+      "type": "compare options, recommend one",
+      "prompt": "Reminders are lost when the process restarts. Compare realistic ways to make storage persistent and recommend one.",
+      "mustHave": [
+        "Recommends an embedded single-file database such as SQLite (not a database server like Postgres, and not Redis)",
+        "Justifies the pick with the deployment: one process on one VM and under about 5,000 reminders",
+        "Notes that db.js already exposes a SQL-style query() interface, so swapping in a SQL store needs small changes to callers"
+      ]
+    },
+    {
+      "id": "review-api",
+      "type": "review",
+      "prompt": "Review src/api.js. What are the real problems?",
+      "mustHave": [
+        "SQL injection in searchReminders: userId and q are concatenated into the SQL string instead of passed as parameters",
+        "No validation of `at` or tzOffsetMin: a malformed date gives a NaN due_ms, so the reminder never fires",
+        "No authentication or ownership check: userId comes from the caller, so anyone can list or search any user's reminders and delete any reminder by id"
+      ]
+    },
+    {
+      "id": "plan-quiet-hours",
+      "type": "plan, no code",
+      "prompt": "We want per-user quiet hours, for example 22:00 to 07:00 local time, when reminders are held and sent after the window ends. Plan the change. Don't write any code.",
+      "mustHave": [
+        "There is no per-user settings storage today (only user_id on reminders), so it needs a new table or store and an API endpoint to set quiet hours (db.js, api.js)",
+        "Enforcement belongs in the scheduler (dueReminders or tick), using the user's tz_offset_min to get their local time",
+        "The window crosses midnight (22:00 to 07:00), so the check must handle wrap-around",
+        "The scheduler's double timezone offset bug should be fixed first, or the local-time math will be wrong"
+      ]
+    },
+    {
+      "id": "safe-delete-legacy",
+      "type": "risk question",
+      "prompt": "Is it safe to delete src/legacy.js?",
+      "mustHave": [
+        "No. notify.js loads formatters dynamically with import(`./${name}.js`), so a search for static imports does not find legacy.js",
+        "config.json sets the formatter to \"legacy\" (and notify.js defaults to 'legacy'), so deleting it breaks every notification at runtime",
+        "The tests would not catch it: notify.test.js only uses the 'format' formatter"
+      ]
+    },
+    {
+      "id": "jitter-correct",
+      "type": "why + is it right",
+      "prompt": "Why does retry.js add jitter, and is its implementation right?",
+      "mustHave": [
+        "Jitter spreads retries out so many failing sends do not all retry at the same instant (thundering herd)",
+        "Bug: jitter is added after the cap, so the delay can exceed maxDelayMs (by up to 500 ms)",
+        "Bug: the fixed +/-500 ms jitter is larger than the early backoff (200 ms at attempt 0), so the delay can go negative",
+        "Fix: scale the jitter to the delay and/or clamp the result between 0 and maxDelayMs"
+      ]
+    },
+    {
+      "id": "overview",
+      "type": "codebase overview",
+      "prompt": "Give me an overview of this codebase for a new engineer.",
+      "mustHave": [
+        "A small Node 20 ES-module service with no dependencies, tested with node:test",
+        "api.js handles create, list, search and delete, and stores reminders through db.js, an in-memory stand-in for a SQL database",
+        "A scheduler timer (scheduler.js) finds due reminders and delivers them through notify.js with retry.js backoff; the formatter is chosen in config.json",
+        "All data is held in memory and is lost on restart"
+      ]
+    },
+    {
+      "id": "test-gaps",
+      "type": "test coverage gaps",
+      "prompt": "Where are the test coverage gaps? Which ones matter most?",
+      "mustHave": [
+        "scheduler tick() (the send, mark-sent and failure path) has no tests; only dueReminders is tested",
+        "The scheduler tests only use a UTC offset of 0, so timezone handling is not tested",
+        "The search endpoint in api.js (the one that concatenates SQL) has no test",
+        "retry.js delay bounds and jitter are not tested (the tests stub randomness so there is no jitter)"
+      ]
+    }
+  ],
+  "fix": [
+    {
+      "id": "fix-timezone",
+      "check": "a",
+      "prompt": "Users east of UTC (for example India, UTC+5:30) report that reminders fire hours early. Find the cause and fix it. Add a regression test, and run `node --test test/` to confirm everything passes."
+    },
+    {
+      "id": "fix-sql",
+      "check": "b",
+      "prompt": "The search endpoint in src/api.js builds its SQL by string concatenation. Fix it. Add a test, and run `node --test test/` to confirm everything passes."
+    },
+    {
+      "id": "fix-jitter",
+      "check": "c",
+      "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes."
+    }
+  ]
+}

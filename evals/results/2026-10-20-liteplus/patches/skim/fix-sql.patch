@@ -1,0 +1,57 @@
+diff -ruN <repo>/evals/fixture/src/api.js <tmp>/skim-eval-skim-fix-sql-HCDo26/reminder-service/src/api.js
+--- <repo>/evals/fixture/src/api.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-sql-HCDo26/reminder-service/src/api.js	2026-10-20 17:03:20
+@@ -27,9 +27,11 @@
+ }
+ 
+ function searchReminders({ query: q }) {
+-  const sql =
+-    "SELECT * FROM reminders WHERE user_id = '" + q.userId + "' AND text LIKE '%" + q.q + "%'";
+-  return { status: 200, body: query(sql) };
++  const rows = query('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [
++    q.userId,
++    `%${q.q}%`,
++  ]);
++  return { status: 200, body: rows };
+ }
+ 
+ function deleteReminder({ path }) {
+diff -ruN <repo>/evals/fixture/test/api.test.js <tmp>/skim-eval-skim-fix-sql-HCDo26/reminder-service/test/api.test.js
+--- <repo>/evals/fixture/test/api.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-sql-HCDo26/reminder-service/test/api.test.js	2026-10-20 17:03:15
+@@ -1,11 +1,13 @@
+ import { test, beforeEach } from 'node:test';
+ import assert from 'node:assert/strict';
+ import { handle, toUtcMs } from '../src/api.js';
+-import { reset } from '../src/db.js';
++import { reset, queryLog } from '../src/db.js';
+ 
+ beforeEach(() => reset());
+ 
+ const create = (body) => handle({ method: 'POST', path: '/reminders', body });
++const search = (userId, q) =>
++  handle({ method: 'GET', path: '/reminders/search', query: { userId, q } });
+ 
+ test('toUtcMs converts local time to UTC using the offset', () => {
+   assert.equal(toUtcMs('2026-03-01T09:00', 0), Date.parse('2026-03-01T09:00:00Z'));
+@@ -36,4 +38,20 @@
+   const { body } = create({ userId: 'u1', text: 'a', at: '2026-03-01T09:00' });
+   assert.equal(handle({ method: 'DELETE', path: `/reminders/${body.id}` }).status, 204);
+   assert.equal(handle({ method: 'DELETE', path: `/reminders/${body.id}` }).status, 404);
++});
++
++test('search passes user input as parameters, not as SQL', () => {
++  search("u1' OR '1'='1", "x' OR '1'='1");
++  const { sql, params } = queryLog.at(-1);
++  assert.equal(sql, 'SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?');
++  assert.deepEqual(params, ["u1' OR '1'='1", "%x' OR '1'='1%"]);
++});
++
++test('search treats SQL keywords in the term as text and stays within the user', () => {
++  create({ userId: 'u1', text: 'buy bread and milk', at: '2026-03-01T09:00' });
++  create({ userId: 'u1', text: 'call mum', at: '2026-03-01T09:00' });
++  create({ userId: 'u2', text: 'bread and milk for u2', at: '2026-03-01T09:00' });
++  const res = search('u1', 'bread and milk');
++  assert.equal(res.status, 200);
++  assert.deepEqual(res.body.map((r) => r.text), ['buy bread and milk']);
+ });

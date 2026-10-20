@@ -1,0 +1,125 @@
+{
+  "arm": "skim",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 61777,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 59988,
+  "stop_reason": "end_turn",
+  "session_id": "6bac2b04-7d1a-4674-8869-27bb1f2192dc",
+  "total_cost_usd": 0.3643584,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 28765,
+    "cache_read_input_tokens": 227512,
+    "output_tokens": 4434,
+    "output_tokens_details": {
+      "thinking_tokens": 1333
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28765,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1339,
+        "cache_read_input_tokens": 39703,
+        "cache_creation_input_tokens": 1113,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1113
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 4434,
+      "cacheReadInputTokens": 227512,
+      "cacheCreationInputTokens": 28765,
+      "webSearchRequests": 0,
+      "costUSD": 0.3643584,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1333,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01NQS8HYnJCNt5vyBU9Yoc5k",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -9\necho \"--- against old code ---\"\ncp src/retry.js /tmp/retry.fixed.js\nsed -i '' 's/return Math.min(maxDelayMs, Math.max(0, exp + jitter));/return exp + jitter;/' src/retry.js\nnode --test test/retry.test.js 2>&1 | grep -E '^(not ok|ok|# (pass|fail))'\ncp /tmp/retry.fixed.js src/retry.js && grep -n 'return Math.min' src/retry.js",
+        "description": "Run tests, then confirm new tests fail on old code"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Jitter is now kept within `[0, maxDelayMs]`. All 14 tests pass (11 before, plus 3 new).**\n\n**Cause:** `backoffDelay` capped the delay at `maxDelayMs` first, then added ±500 ms of jitter. So the result could be as low as `200 − 500 = −300` or as high as `10_000 + 500`.\n\n**Fix:** the result is clamped after the jitter is added (`src/retry.js:10`):\n```js\nreturn Math.min(maxDelayMs, Math.max(0, exp + jitter));\n```\n\n| File | Change |\n|---|---|\n| `src/retry.js` | clamp the result, plus a 1-line comment |\n| `test/retry.test.js` | imports `backoffDelay`; 3 new tests |\n\n**New tests:**\n- lowest jitter (`Math.random → 0`) gives `0`, not a negative delay\n- highest jitter gives exactly `maxDelayMs`, both when the cap is reached through attempts and when the cap is below `baseMs`\n- 3,000 random samples over 30 attempts all land in `[0, 2000]`\n\n**Proof:** `node --test test/` → `# pass 14`, `# fail 0`.\n\n**Not run:** I didn't run the new tests against the old code; my command to swap the old line back in was blocked. Working it out by hand, the first two would fail there: −300 instead of 0, and about 10,500 instead of 10,000.\n\n⚠ **Risk:** clamping changes how delays are spread at both ends.\n- **Low end:** about 30% of first retries (attempt 0, `baseMs` 200) get a 0 ms delay. Before, they got a negative delay, which `setTimeout` treats as about 1 ms, so the scheduler behaves almost the same.\n- **High end:** once the backoff reaches the cap, about half of retries land on exactly `maxDelayMs` together. `scheduler.js:16` (5 attempts, default `baseMs`) peaks at 1,600 ms, below the 10,000 ms cap, so it isn't affected today.\n\nIf those clusters matter later, shrinking the jitter near the edges, or \"full jitter\" (`Math.random() * exp`), would avoid them.",
+  "ttft_ms": 3754,
+  "type": "result",
+  "duration_ms": 60634,
+  "uuid": "8fdc6fdd-00ce-4758-93a5-74c31a1438c7",
+  "ttft_stream_ms": 3113,
+  "time_to_request_ms": 22,
+  "first_content_frame_ms": 3113,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 14,
+      "pass": 14,
+      "fail": 0
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "jitter-correct",
+  "kind": "read",
+  "prompt": "Why does retry.js add jitter, and is its implementation right?",
+  "wall_ms": 28859,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 27564,
+  "stop_reason": "end_turn",
+  "session_id": "9fc80739-f28c-46f9-b3df-424f2d1bfb97",
+  "total_cost_usd": 0.27491639999999995,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 24918,
+    "cache_read_input_tokens": 108802,
+    "output_tokens": 2689,
+    "output_tokens_details": {
+      "thinking_tokens": 1439
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24918,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1270,
+        "cache_read_input_tokens": 34300,
+        "cache_creation_input_tokens": 2669,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2669
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2689,
+      "cacheReadInputTokens": 108802,
+      "cacheCreationInputTokens": 24918,
+      "webSearchRequests": 0,
+      "costUSD": 0.27491639999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1439,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_018VKPPhT69TCBHqj67NKZ1u",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { backoffDelay } from './src/retry.js';\nconst N=100000;\nfor (const a of [0,1,2,6]) { let neg=0,min=Infinity,max=-Infinity; for(let i=0;i<N;i++){const d=backoffDelay(a); if(d<=0)neg++; min=Math.min(min,d); max=Math.max(max,d);} console.log('attempt',a,'<=0:',(neg/N*100).toFixed(1)+'%','min',min.toFixed(0),'max',max.toFixed(0)); }\n\"",
+        "description": "Simulate backoffDelay to measure negative and out-of-range delays"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Purpose is right; the implementation is not.** Jitter stops failed sends from retrying in sync (`src/retry.js:2`).\n\nThe bug: jitter is a **fixed ±500 ms** (`JITTER_MS`, `retry.js:4,8`), not scaled to the backoff:\n1. **Negative delays at low attempts.** Attempt 0 is 200 ms ± 500, so the range is **−300 to 700 ms**. About **30%** of first retries go negative, and about **10%** of second retries do. Node clamps these to ~1 ms, so they all fire at once. That recreates the herd that jitter is meant to prevent.\n2. **The default config only hits those cases.** With `attempts = 3`, only attempts 0 and 1 sleep, which are the two broken ones.\n3. **Too little spread at the cap.** At 10 s, ±500 ms is only ±5%. Delays can also reach **10.5 s**, past `maxDelayMs`.\n\n**Fix:** scale the jitter to the delay (\"full jitter\"). The result is always between 0 and `maxDelayMs`:\n```js\nconst exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);\nreturn Math.random() * exp;            // or: exp / 2 + Math.random() * exp / 2\n```\nThe second form (\"equal jitter\") keeps a minimum wait of half the backoff.\n\n**Tests miss this:** `test/retry.test.js:6` pins `Math.random` to 0.5, so jitter is always 0 there. No test checks that delays are ≥ 0 or ≤ `maxDelayMs`.\n\n**Not verified:** the 30% and 10% figures come from the math (`random < 0.3` and `random < 0.1`). My simulation script needed approval and didn't run.",
+  "ttft_ms": 1943,
+  "type": "result",
+  "duration_ms": 27633,
+  "uuid": "b7460eb8-ae0f-4904-b37a-51b18bf10506",
+  "ttft_stream_ms": 1005,
+  "time_to_request_ms": 21,
+  "first_content_frame_ms": 1005,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,107 @@
+{
+  "arm": "skim",
+  "case": "safe-delete-legacy",
+  "kind": "read",
+  "prompt": "Is it safe to delete src/legacy.js?",
+  "wall_ms": 36568,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 35218,
+  "stop_reason": "end_turn",
+  "session_id": "c504444c-ad48-4286-a6a9-c42aaa503568",
+  "total_cost_usd": 0.2835404,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 25765,
+    "cache_read_input_tokens": 110242,
+    "output_tokens": 2767,
+    "output_tokens_details": {
+      "thinking_tokens": 597
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25765,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1137,
+        "cache_read_input_tokens": 35751,
+        "cache_creation_input_tokens": 2065,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2065
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2767,
+      "cacheReadInputTokens": 110242,
+      "cacheCreationInputTokens": 25765,
+      "webSearchRequests": 0,
+      "costUSD": 0.2835404,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 597,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**No, it's not safe to delete.** Production uses it on every send.\n\n1. **Production uses it:** `config.json:3` sets `\"formatter\": \"legacy\"`. `src/index.js:6` passes that to the scheduler, and from there it reaches `send()`.\n2. **The import is dynamic:** `src/notify.js:8` loads `` import(`./${name}.js`) ``. No line ever says `import ... from './legacy.js'`, which makes the file look unused.\n3. **It's also the fallback:** `src/notify.js:14` uses `formatter = 'legacy'` whenever no formatter is passed.\n4. **What breaks:** every `send()` would throw module-not-found. `scheduler.js:16` retries 5 times, logs the error and leaves the reminder unsent. So **no reminders would go out**, and every tick would log errors.\n5. **Tests won't catch it:** `test/notify.test.js:8` only tests `formatter: 'format'`. `npm test` would still pass. I didn't run the tests.\n\n**To remove it safely:**\n1. **Check that everything reading the old `REMIND|user|at|text` format has moved to the new one.** That's the condition in the file's own TODO (`legacy.js:2`). I can't check it from this folder; it's not a git repo and nothing here shows who reads the output.\n2. Set `config.json:3` to `\"formatter\": \"format\"`.\n3. Change the default at `notify.js:14` to `'format'`.\n4. Delete `src/legacy.js` and its line in `README.md:28`.\n\n**Also:** step 2 changes the output from `REMIND|u1|...|call mum` to `Reminder for u1: call mum (set for ...)`. Anything that parses the old pipe format will break as soon as config switches, even before the file is deleted.",
+  "ttft_ms": 4165,
+  "type": "result",
+  "duration_ms": 35290,
+  "uuid": "94fcac38-e3d0-42c0-98f4-8e60639d93e9",
+  "ttft_stream_ms": 3813,
+  "time_to_request_ms": 24,
+  "first_content_frame_ms": 3813,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 56852,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 54676,
+  "stop_reason": "end_turn",
+  "session_id": "6ad46923-360c-4916-b5d7-12c2d7a68703",
+  "total_cost_usd": 0.5261162,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 29798,
+    "cache_read_input_tokens": 187361,
+    "output_tokens": 3160,
+    "output_tokens_details": {
+      "thinking_tokens": 1144
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28038,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 758,
+        "cache_read_input_tokens": 38966,
+        "cache_creation_input_tokens": 1123,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1123
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 39060,
+      "outputTokens": 4965,
+      "cacheReadInputTokens": 187361,
+      "cacheCreationInputTokens": 29798,
+      "webSearchRequests": 0,
+      "costUSD": 0.5261162,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1144,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Jitter is now clamped to 0–maxDelayMs. 13/13 tests pass.**\n- **Cause:** the code capped the delay at `maxDelayMs` before adding ±500 ms of jitter, not after (`src/retry.js:9`)\n- **Fix:** it now clamps the final sum: `Math.min(maxDelayMs, Math.max(0, exp + jitter))`\n- **Tests:** two new tests check both limits, including a custom `maxDelayMs: 300`\n- **Also:** the jitter is a fixed ±500 ms but `baseMs` is 200, so early retries often land at exactly 0 ms. I left this alone.\n\n───\n\n```\nsrc/retry.js         +1 −1   clamp exp + jitter to [0, maxDelayMs]\ntest/retry.test.js  +12 −1   import backoffDelay; low and high bound tests\n```\n\n- **Existing tests unchanged:** they stub `Math.random` to `0.5`, which gives zero jitter. With zero jitter the clamp returns exactly `exp`, so those tests behave as before.\n- **New tests:** they stub `Math.random` to `0` and `1` and check exact values. The old code would have returned `-300` and `10500`, not `0` and `10000`. I worked those numbers out by hand and did not run the new tests against the old code.\n- **Early retries at 0 ms:** at attempts 0 and 1, `exp` is 200 or 400 ms. A −500 ms jitter pushes that below zero, and the clamp turns it into 0 ms. Retries that land there all happen at the same moment. Scaling the jitter to `exp` would spread them out, but that's a change in behavior, so it's your call.\n- **Run:** `node --test test/` gave 13 pass, 0 fail.",
+  "ttft_ms": 1612,
+  "type": "result",
+  "duration_ms": 55585,
+  "uuid": "a9aa7411-9205-4ab3-9798-5cce8f164ed7",
+  "ttft_stream_ms": 1062,
+  "time_to_request_ms": 194,
+  "first_content_frame_ms": 1062,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}

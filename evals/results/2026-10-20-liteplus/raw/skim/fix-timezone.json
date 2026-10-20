@@ -1,0 +1,148 @@
+{
+  "arm": "skim",
+  "case": "fix-timezone",
+  "kind": "fix",
+  "prompt": "Users east of UTC (for example India, UTC+5:30) report that reminders fire hours early. Find the cause and fix it. Add a regression test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 65426,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 63036,
+  "stop_reason": "end_turn",
+  "session_id": "55d1f290-40e0-49cb-9597-a119f1587c03",
+  "total_cost_usd": 0.6468166,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 33617,
+    "cache_read_input_tokens": 318378,
+    "output_tokens": 4611,
+    "output_tokens_details": {
+      "thinking_tokens": 574
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 32952,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 40,
+        "cache_read_input_tokens": 43963,
+        "cache_creation_input_tokens": 1040,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1040
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 45952,
+        "output_tokens": 2005,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 648,
+        "cache_read_input_tokens": 45003,
+        "cache_creation_input_tokens": 665,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 665,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 45970,
+      "outputTokens": 6616,
+      "cacheReadInputTokens": 318378,
+      "cacheCreationInputTokens": 33617,
+      "webSearchRequests": 0,
+      "costUSD": 0.6468166,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 574,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01UQLoLR31knyAGGCXCVq1QF",
+      "tool_input": {
+        "command": "for f in README.md config.json src/*.js test/*.js; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Print all source, test and config files"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 19,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Fixed: the scheduler applied the user's UTC offset a second time.** All **13/13 tests pass** with `node --test test/`.\n\n1. **Cause:** `api.js:8` (`toUtcMs`) already converts the local time to UTC when the reminder is created. `src/scheduler.js:9` then **subtracted `tz_offset_min` again** before comparing with the current time.\n2. **Effect:** IST (+330) reminders fired **5h30 early**. The same bug made **users west of UTC get reminders late**, for example 5h late at UTC-5. Nobody had reported that yet.\n3. **Fix:** `src/scheduler.js:9` now compares `r.due_ms <= nowMs` directly. I also corrected the comment that wrongly said `due_ms` is wall-clock time.\n4. **Regression tests:** I added 2 tests to `test/scheduler.test.js`, one east (+330) and one west (-300). They build `due_ms` with the real `toUtcMs`, and both **failed before the fix**.\n5. **No data migration needed:** the stored `due_ms` values were always correct; only the comparison was wrong. The DB is in-memory anyway.\n\nThe fix belongs in the scheduler, not in `api.js`. The README defines `due_ms` as a UTC epoch, and `test/api.test.js:10-13` already locks in `toUtcMs`'s conversion. Nothing else reads `tz_offset_min` (`notify.js`, `format.js` and `legacy.js` don't touch it).\n\n**Also (not fixed, out of scope):** `searchReminders` builds its SQL by **string concatenation** (`api.js:31`). That's a SQL injection risk, and it will matter once the in-memory DB is swapped for a real one.",
+  "ttft_ms": 1775,
+  "type": "result",
+  "duration_ms": 64033,
+  "uuid": "f68dd130-7139-4d03-b43b-c1651abfcd45",
+  "ttft_stream_ms": 1113,
+  "time_to_request_ms": 174,
+  "first_content_frame_ms": 1113,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}

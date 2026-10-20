@@ -1,0 +1,139 @@
+{
+  "arm": "skim",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 188602,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 187018,
+  "stop_reason": "end_turn",
+  "session_id": "a87d0826-ac66-411b-899f-5145560ab9ae",
+  "total_cost_usd": 0.8670348,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 35704,
+    "cache_read_input_tokens": 240679,
+    "output_tokens": 9439,
+    "output_tokens_details": {
+      "thinking_tokens": 5863
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 33833,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 678,
+        "cache_read_input_tokens": 43605,
+        "cache_creation_input_tokens": 2279,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2279
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 44741,
+        "output_tokens": 8554,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 3085,
+        "cache_read_input_tokens": 45884,
+        "cache_creation_input_tokens": 1871,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1871,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 44755,
+      "outputTokens": 17993,
+      "cacheReadInputTokens": 240679,
+      "cacheCreationInputTokens": 35704,
+      "webSearchRequests": 0,
+      "costUSD": 0.8670348,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5863,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01L4tJuooH4cWmcmajDZTKBr",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -12; node --input-type=module -e \"\nimport { handle } from './src/api.js';\nimport { dueReminders } from './src/scheduler.js';\nconst c = (b) => handle({ method: 'POST', path: '/reminders', body: b });\n// 1. timezone double-shift\nconst ist = c({ userId: 'u1', text: 'ist', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconst ny  = c({ userId: 'u1', text: 'ny',  at: '2026-03-01T09:00', tzOffsetMin: -300 }).body;\nconsole.log('IST stored due', new Date(ist.due_ms).toISOString(), '(correct 03:30Z)');\nfor (const t of ['2026-02-28T22:00:00Z','2026-03-01T03:30:00Z']) console.log('IST due at', t, dueReminders([ist], Date.parse(t)).length);\nfor (const t of ['2026-03-01T14:00:00Z','2026-03-01T19:00:00Z']) console.log('NY  due at', t, dueReminders([ny], Date.parse(t)).length);\n// 2. bad at\nfor (const at of ['2026-03-01T09:00:00','tomorrow','2026-03-01']) { const r = c({ userId: 'u1', text: 'x', at }); console.log('at=',at,'->',r.status,'due_ms',r.body.due_ms, 'ever due?', dueReminders([r.body], 9e15).length); }\nconst r = c({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 'abc' }); console.log('tz=abc ->', r.status, r.body.due_ms);\n// 3. missing query\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('GET no query ->', e.constructor.name, e.message); }\n// 4. injection: SQL actually built\nhandle({ method: 'GET', path: '/reminders/search', query: { userId: \\\"x' OR '1'='1\\\", q: 'a' } }).status;\n\" 2>&1; node --input-type=module -e \"\nimport { handle } from './src/api.js'; import { queryLog } from './src/db.js';\ntry { handle({ method: 'GET', path: '/reminders/search', query: { userId: \\\"x' OR '1'='1' --\\\", q: '' } }); } catch (e) { console.log('fake db:', e.message); }\nconsole.log('SQL sent:', queryLog.at(-1).sql);\nhandle({ method: 'POST', path: '/reminders', body: { userId: 'victim', text: 's', at: '2026-03-01T09:00' } });\nconsole.log('DELETE by other caller ->', handle({ method: 'DELETE', path: '/reminders/1' }).status);\n\"",
+        "description": "Run tests and probe api.js edge cases"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**4 real problems. The worst is a timezone bug caused by `scheduler.js`, not `api.js`.**\n1. **Reminders fire at the wrong time** for every non-UTC user. `toUtcMs` (`api.js:7`) already returns UTC, then `scheduler.js:9` subtracts the offset again. IST reminders fire **5h30 early**; New York ones fire **5h late**. Fix it in `scheduler.js:9`; **don't change `api.js`**.\n2. **Search breaks on ordinary text** (`api.js:31`). Values are pasted into the SQL, and `db.js:29` splits on ` AND `. So `q=milk and bread` throws `unsupported condition: text LIKE '%milk`. It also becomes **SQL injection** once `db.js` is swapped for a real database.\n3. **Bad input gets a 201 but never fires** (`api.js:13-16`). `at: 'tomorrow'` or `tzOffsetMin: 'abc'` stores `due_ms` as `NaN`, and `NaN <= now` is never true.\n4. **No ownership check on delete** (`api.js:35-38`). Ids count up from 1, so any caller can delete anyone's reminder. List and search also trust the `userId` the client sends. Nothing serves `handle()` yet (`index.js` only starts the scheduler), so this is **latent**.\n\n**Not executed:** the command to run the tests and probes needed approval, so everything here comes from tracing the code.\n\n### Details and fixes\n\n**1. Double timezone shift.** The README table and `api.test.js:12-13` agree that `due_ms` is already UTC. The comment at `scheduler.js:7` is wrong. The tests pass only because `scheduler.test.js` always uses `tz_offset_min: 0`.\n```js\n// scheduler.js:9\nreturn reminders.filter((r) => !r.sent && r.due_ms <= nowMs);\n```\nAdd a scheduler test with offset `330` so this can't come back.\n\n**2. Search.** Use parameters, which also fixes the ` AND ` split:\n```js\nconst sql = 'SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?';\nreturn { status: 200, body: query(sql, [q.userId, `%${q.q ?? ''}%`]) };\n```\n\n**3. Validation.** Return 400 unless `at` matches `^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$` and `Number.isFinite(dueMs)`.\n- An `at` with seconds (`2026-03-01T09:00:00`) likely becomes `NaN` too, because the code appends `:00Z` again. I didn't run it.\n- A missing `tzOffsetMin` silently defaults to **UTC** (`api.js:12`), so a client that leaves it out gets the wrong time. Consider making it required.\n\n**Also:**\n- `GET /reminders` or `/reminders/search` with no `query` throws `TypeError` (`api.js:25`, `:31`), and `handle()` has no try/catch.\n- List without a `userId` returns `200 []` instead of 400. Search without `q` searches for the literal text `\"undefined\"`.\n- A fixed offset is wrong across **DST**: a reminder set in winter for a summer date fires 1h off. This is a design limit and low priority; storing an IANA zone fixes it.\n- Rows are lost on restart, but that's `db.js` and the README already notes it.",
+  "ttft_ms": 3844,
+  "type": "result",
+  "duration_ms": 187353,
+  "uuid": "cbad0d73-43b1-4f00-ac1c-81e23b1f2db4",
+  "ttft_stream_ms": 1999,
+  "time_to_request_ms": 271,
+  "first_content_frame_ms": 1999,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

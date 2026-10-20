@@ -1,0 +1,162 @@
+{
+  "arm": "skim",
+  "case": "compare-storage",
+  "kind": "read",
+  "prompt": "Reminders are lost when the process restarts. Compare realistic ways to make storage persistent and recommend one.",
+  "wall_ms": 154401,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 150786,
+  "stop_reason": "end_turn",
+  "session_id": "57cb5b67-9d8c-4574-bb95-d83792b2ba0d",
+  "total_cost_usd": 0.8747092,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 38541,
+    "cache_read_input_tokens": 425062,
+    "output_tokens": 10615,
+    "output_tokens_details": {
+      "thinking_tokens": 6648
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37433,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 4262,
+        "cache_read_input_tokens": 48063,
+        "cache_creation_input_tokens": 1421,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1421
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 46067,
+      "outputTokens": 14799,
+      "cacheReadInputTokens": 425062,
+      "cacheCreationInputTokens": 38541,
+      "webSearchRequests": 0,
+      "costUSD": 0.8702643999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 6648,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-haiku-5-5": {
+      "inputTokens": 41148,
+      "outputTokens": 660,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "webSearchRequests": 0,
+      "costUSD": 0.0044448000000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 333,
+      "canonicalModel": "claude-haiku-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_014Sq7jg9eQ8rKGJVnPeF6Bz",
+      "tool_input": {
+        "command": "find . -type f -not -path './node_modules/*' -not -path './.git/*' | head -100 && echo --- && wc -l $(find . -type f -not -path './node_modules/*' -not -path './.git/*' | head -50)",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_0196WSM62agg9xYFrmbXdvAb",
+      "tool_input": {
+        "command": "node --version && node -e \"const {DatabaseSync}=require('node:sqlite'); const d=new DatabaseSync(':memory:'); console.log(d.prepare('select sqlite_version() v').get())\" 2>&1; node --test test/ 2>&1 | tail -12",
+        "description": "Check Node version, built-in SQLite, and run tests"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_015cpMg7B9QL7LGhTXVUvDk3",
+      "tool_input": {
+        "command": "node -e \"const {DatabaseSync}=require('node:sqlite'); const d=new DatabaseSync(':memory:'); console.log(d.prepare('select sqlite_version() v').get())\"",
+        "description": "Check built-in node:sqlite works"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01J2djNmrh1kXdtHmMQSKQ7m",
+      "tool_input": {
+        "command": "node --test /private<tmp>/skim-eval-skim-compare-storage-53TiJA/reminder-service/test/",
+        "description": "Run the test suite for a baseline"
+      }
+    },
+    {
+      "tool_name": "WebFetch",
+      "tool_use_id": "toolu_01E7YSEh1oyk8STKEk1eWaj4",
+      "tool_input": {
+        "url": "https://github.com/nodejs/Release/blob/main/README.md",
+        "prompt": "List end-of-life dates for Node 20, 22, 24 and 26, and their current status (Active LTS, Maintenance, EOL)."
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 22,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Pick: a JSON file, rewritten atomically on every change.** It's the only option that breaks none of the README's rules.\n\n| Option | Breaks a README rule? | Catch |\n|---|---|---|\n| **JSON file, atomic write** | **no** | rewrites about 1 MB per change at 5k rows, which is fast |\n| Append-only JSONL log | no | needs replay and compaction; gains nothing at this size |\n| `node:sqlite` (built-in) | **yes: needs Node ≥22.13** | this machine runs **v20.19.0** |\n| `better-sqlite3` | **yes: first dependency** | native add-on that must build on the VM |\n| Postgres / Redis | **yes: new infra** | a server to run for 5k rows |\n\n**SQLite later, not yet.** `node:sqlite` came in v22.5.0 and stopped needing a flag in v22.13.0. Node 20 reached end of life on 2026-04-30, so an upgrade is due anyway. Once you upgrade, `node:sqlite` is the better long-term store, because the code already writes SQL. Before switching, parameterize `src/api.js:31`. It builds the search query by string concatenation, which is harmless against the toy parser but **real SQL injection** against SQLite.\n\n**What the JSON file needs, all in `src/db.js`:**\n1. **Persist `nextId` with the rows.** Otherwise ids restart at 1 after a restart and collide with existing ones.\n2. **Atomic write:** write a temp file, fsync it, then rename it over the real one. A crash mid-write then leaves the old file intact.\n3. **Synchronous writes.** Ticks can overlap, since 5 retries with up to 10s backoff each can outlast the 30s interval. Sync writes can't interleave.\n4. **Fail loudly on a corrupt file.** If it silently starts empty, the next save wipes all reminders.\n5. **Take the path from an env var.** When it's unset, tests stay in memory and `reset()` keeps working (`test/api.test.js:6`).\n\n```js\nconst FILE = process.env.REMINDERS_DB; // unset in tests → memory only\n\nfunction load() {\n  if (!FILE || !existsSync(FILE)) return;\n  const data = JSON.parse(readFileSync(FILE, 'utf8')); // throws if corrupt\n  rows.push(...data.rows);\n  nextId = data.nextId;\n}\n\nfunction save() {\n  if (!FILE) return;\n  const tmp = `${FILE}.tmp`;\n  const fd = openSync(tmp, 'w');\n  writeFileSync(fd, JSON.stringify({ nextId, rows }));\n  fsyncSync(fd);\n  closeSync(fd);\n  renameSync(tmp, FILE);\n}\n// call load() once at module init; save() after INSERT, UPDATE and DELETE\n```\n\n**Tradeoffs to accept (true of every option):**\n- **Delivery is at-least-once.** A crash between `send` and `UPDATE ... sent = 1` (`src/scheduler.js:16-17`) re-sends that reminder on restart.\n- Reminders that came due while the service was down all fire together on the first tick.\n\n**Not verified:** I didn't run the tests or try `node:sqlite` here, because both commands needed approval. I took the \"release candidate\" status from the v26.12.0 docs; I didn't check whether the v22 and v24 docs still call it experimental. The Node 20 end-of-life date is from memory, since the fetch of the release schedule was blocked.\n\n**Also:** `src/scheduler.js:9` subtracts `tz_offset_min` a second time, but `due_ms` is already UTC (`src/api.js:8`). As a result, IST reminders fire **5.5 hours early**, and negative offsets fire late. The tests miss this because they only use offset 0.",
+  "ttft_ms": 1707,
+  "type": "result",
+  "duration_ms": 151410,
+  "uuid": "6663b157-771f-47e3-8e82-31bc32e604e6",
+  "ttft_stream_ms": 1106,
+  "time_to_request_ms": 48,
+  "first_content_frame_ms": 1106,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>skim side by side</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+:root{--bg:#f6f5f2;--fg:#1c1c1a;--mut:#74726c;--line:#dedbd3;--chip:#ebe8e1;--acc:#2f5bd3;--term:#18181a;--tfg:#d6d6d3;--tmut:#8b8b86;--tline:#3a3a3d}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#111110;--fg:#ecebe6;--mut:#9a988f;--line:#2b2a27;--chip:#22211f;--acc:#7da2ff;--term:#0b0b0c;--tline:#2e2e31}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+header{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.brand{font-weight:700;margin-right:6px}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+button{font:inherit;color:inherit;background:var(--chip);border:1px solid transparent;border-radius:6px;padding:4px 10px;cursor:pointer}
+button:hover{border-color:var(--line)}
+button.on{background:var(--acc);color:#fff}
+.sp{flex:1}
+.q{padding:14px 16px 4px;max-width:1100px}
+.q .n{color:var(--mut);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.q .p{font-size:16px;font-weight:600;margin-top:2px}
+.grid{display:grid;gap:12px;padding:10px 16px 24px;overflow-x:auto}
+.pane{display:flex;flex-direction:column;min-width:0}
+.ph{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:0 2px 6px}
+.ph .l{font-weight:700}
+.stat{color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
+.stat b{color:var(--fg);font-weight:600}
+.term{background:var(--term);color:var(--tfg);border-radius:8px;padding:12px 14px;overflow:auto;height:calc(100vh - 190px);min-height:320px;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.one .term{height:calc(100vh - 190px);font-size:13px}
+.one .pane{max-width:110ch}
+.term p{margin:0 0 .7em}
+.term strong{color:#fff}
+.term em{color:#e8e6df}
+.term code{color:#e5c07b;font:inherit}
+.term pre{margin:.4em 0 .8em;white-space:pre;overflow-x:auto;color:#cfcfca}
+.term pre code{color:inherit}
+.term h1,.term h2,.term h3,.term h4,.term h5,.term h6{font-size:inherit;font-weight:700;color:#fff;margin:.9em 0 .3em}
+.term ul,.term ol{margin:0 0 .7em;padding-left:2.2ch}
+.term li{margin:.1em 0}
+.term table{border-collapse:collapse;margin:.3em 0 .8em}
+.term th,.term td{border:1px solid var(--tline);padding:1px 8px;text-align:left;vertical-align:top}
+.term th{color:#fff}
+.term blockquote{margin:0 0 .7em;padding-left:1.2ch;border-left:2px solid var(--tline);color:var(--tmut)}
+.term hr{border:0;border-top:1px solid var(--tline)}
+.term a{color:#7aa2f7}
+.pick{margin-top:8px;align-self:flex-start}
+.picked .term{outline:2px solid var(--acc)}
+.tally{padding:0 16px 24px;color:var(--mut)}
+.tally b{color:var(--fg)}
+@media (max-width:720px){.grid{grid-template-columns:1fr!important}.term{height:70vh}}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">skim</span>
+  <div class="chips" id="nav"></div>
+  <span class="sp"></span>
+  <div class="chips" id="show"></div>
+  <div class="chips">
+    <button id="vSide" class="on">Side by side</button>
+    <button id="vOne">One at a time</button>
+  </div>
+  <button id="blind">Blind</button>
+</header>
+<div class="q"><div class="n" id="qn"></div><div class="p" id="qp"></div></div>
+<div class="grid" id="grid"></div>
+<div class="tally" id="tally"></div>
+
+<script>
+const DATA = /*DATA*/null;
+const cols = DATA.columns, qs = DATA.questions;
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+let qi = store.get('qi', 0), view = 'side', blind = false, tab = 0;
+const hidden = new Set(store.get('hidden', []));
+const picks = store.get('picks', {});
+const seed = store.get('seed', Math.random()); store.set('seed', seed);
+const render = (md) => window.marked ? marked.parse(md, { gfm: true, breaks: false }) : '<pre>' + md.replace(/[&<]/g, (c) => ({ '&': '&amp;', '<': '&lt;' })[c]) + '</pre>';
+
+function order(i) {
+  const shown = cols.map((_, k) => k).filter((k) => !hidden.has(cols[k].key));
+  if (!blind) return shown;
+  // Same shuffle for a question every time, different per viewer.
+  const ks = shown; let s = Math.floor((seed + i) * 1e9) || 1;
+  for (let k = ks.length - 1; k > 0; k--) { s = (s * 48271) % 2147483647; const j = s % (k + 1); [ks[k], ks[j]] = [ks[j], ks[k]]; }
+  return ks;
+}
+
+function showChips() {
+  const el = document.getElementById('show'); el.innerHTML = '';
+  cols.forEach((c) => { const b = document.createElement('button'); b.textContent = c.label; if (!hidden.has(c.key)) b.className = 'on'; b.onclick = () => { hidden.has(c.key) ? hidden.delete(c.key) : hidden.add(c.key); if (hidden.size === cols.length) hidden.delete(c.key); store.set('hidden', [...hidden]); draw(); }; el.appendChild(b); });
+}
+
+function nav() {
+  const el = document.getElementById('nav'); el.innerHTML = '';
+  qs.forEach((q, i) => { const b = document.createElement('button'); b.textContent = i + 1; b.title = q.id; if (i === qi) b.className = 'on'; b.onclick = () => go(i); el.appendChild(b); });
+}
+
+function pane(k, slot) {
+  const c = cols[k], a = qs[qi].answers[c.key], q = qs[qi];
+  const p = document.createElement('div'); p.className = 'pane' + (picks[q.id] === c.key ? ' picked' : '');
+  const name = blind ? 'Reply ' + 'ABCD'[slot] : c.label;
+  const stats = blind ? '' :
+    `<span class="stat"><b>${a.lines}</b> lines · <b>~${a.tokens.toLocaleString()}</b> tokens` +
+    (a.factsFull != null ? ` · facts <b>${a.factsFull}/${q.facts}</b> · in first 12 lines <b>${a.factsTop}/${q.facts}</b>` : '') + '</span>';
+  p.innerHTML = `<div class="ph"><span class="l">${name}</span>${stats}</div><div class="term">${render(a.text)}</div>`;
+  if (blind) { const b = document.createElement('button'); b.className = 'pick'; b.textContent = picks[q.id] === c.key ? '✓ Easiest to read' : 'Easiest to read'; b.onclick = () => { picks[q.id] = c.key; store.set('picks', picks); draw(); }; p.appendChild(b); }
+  return p;
+}
+
+function draw() {
+  const q = qs[qi]; nav(); showChips();
+  document.getElementById('qn').textContent = `Question ${qi + 1} of ${qs.length}`;
+  document.getElementById('qp').textContent = q.prompt;
+  const g = document.getElementById('grid'); g.innerHTML = ''; g.classList.toggle('one', view === 'one');
+  const ks = order(qi);
+  if (view === 'side') { g.style.gridTemplateColumns = `repeat(${ks.length}, minmax(38ch, 1fr))`; ks.forEach((k, s) => g.appendChild(pane(k, s))); }
+  else {
+    g.style.gridTemplateColumns = '1fr';
+    const t = document.createElement('div'); t.className = 'chips';
+    ks.forEach((k, s) => { const b = document.createElement('button'); b.textContent = (blind ? 'Reply ' + 'ABCD'[s] : cols[k].label) + `  ${s + 1}`; if (s === tab) b.className = 'on'; b.onclick = () => { tab = s; draw(); }; t.appendChild(b); });
+    g.appendChild(t); g.appendChild(pane(ks[Math.min(tab, ks.length - 1)], Math.min(tab, ks.length - 1)));
+  }
+  tally();
+}
+
+function tally() {
+  const el = document.getElementById('tally'); const n = Object.keys(picks).length;
+  if (!n) { el.innerHTML = blind ? 'Pick the easiest reply for each question, then turn Blind off to see which style it was.' : ''; return; }
+  if (blind) { el.innerHTML = `<b>${n}</b> of ${qs.length} picked. Turn Blind off to reveal.`; return; }
+  const c = {}; Object.values(picks).forEach((k) => (c[k] = (c[k] || 0) + 1));
+  el.innerHTML = 'Your blind picks: ' + cols.map((x) => `${x.label} <b>${c[x.key] || 0}</b>`).join(' · ') + ' <button id="reset">Reset</button>';
+  document.getElementById('reset').onclick = () => { for (const k in picks) delete picks[k]; store.set('picks', picks); draw(); };
+}
+
+function go(i) { qi = (i + qs.length) % qs.length; tab = 0; store.set('qi', qi); draw(); scrollTo(0, 0); }
+document.getElementById('vSide').onclick = () => { view = 'side'; vSide.className = 'on'; vOne.className = ''; draw(); };
+document.getElementById('vOne').onclick = () => { view = 'one'; vOne.className = 'on'; vSide.className = ''; draw(); };
+document.getElementById('blind').onclick = (e) => { blind = !blind; e.target.className = blind ? 'on' : ''; draw(); };
+addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') go(qi + 1); else if (e.key === 'ArrowLeft') go(qi - 1);
+  else if (view === 'one' && /^[1-4]$/.test(e.key) && +e.key <= cols.length) { tab = +e.key - 1; draw(); }
+});
+if (qi >= qs.length) qi = 0;
+draw();
+</script>
+</body>
+</html>

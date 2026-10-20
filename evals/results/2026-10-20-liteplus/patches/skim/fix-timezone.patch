@@ -1,0 +1,50 @@
+diff -ruN <repo>/evals/fixture/src/scheduler.js <tmp>/skim-eval-skim-fix-timezone-w4dyrX/reminder-service/src/scheduler.js
+--- <repo>/evals/fixture/src/scheduler.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-timezone-w4dyrX/reminder-service/src/scheduler.js	2026-10-20 17:01:57
+@@ -4,9 +4,9 @@
+ import { withRetry } from './retry.js';
+ 
+ // A reminder is due once its time has arrived and it has not been sent.
+-// due_ms is the user's wall-clock time, so shift it back to UTC with their offset.
++// due_ms is already a UTC epoch (api.js applies the offset on create), so compare it directly.
+ export function dueReminders(reminders, nowMs) {
+-  return reminders.filter((r) => !r.sent && r.due_ms - r.tz_offset_min * 60_000 <= nowMs);
++  return reminders.filter((r) => !r.sent && r.due_ms <= nowMs);
+ }
+ 
+ export async function tick(nowMs = Date.now(), opts = {}) {
+diff -ruN <repo>/evals/fixture/test/scheduler.test.js <tmp>/skim-eval-skim-fix-timezone-w4dyrX/reminder-service/test/scheduler.test.js
+--- <repo>/evals/fixture/test/scheduler.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-timezone-w4dyrX/reminder-service/test/scheduler.test.js	2026-10-20 17:01:52
+@@ -1,6 +1,7 @@
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
+ import { dueReminders } from '../src/scheduler.js';
++import { toUtcMs } from '../src/api.js';
+ 
+ const at = (iso) => Date.parse(iso);
+ const reminder = (over) => ({ id: 1, sent: 0, tz_offset_min: 0, due_ms: at('2026-03-01T09:00:00Z'), ...over });
+@@ -9,6 +10,23 @@
+   const r = reminder();
+   assert.equal(dueReminders([r], at('2026-03-01T08:59:00Z')).length, 0);
+   assert.equal(dueReminders([r], at('2026-03-01T09:00:00Z')).length, 1);
++});
++
++// Regression: due_ms is already UTC (api.js converts it on create). The scheduler
++// used to subtract the offset a second time, so IST reminders fired 5h30 early.
++test('a reminder east of UTC is due at its local time, not earlier', () => {
++  const r = reminder({ tz_offset_min: 330, due_ms: toUtcMs('2026-03-01T09:00', 330) });
++  // 09:00 IST is 03:30 UTC.
++  assert.equal(dueReminders([r], at('2026-02-28T22:00:00Z')).length, 0);
++  assert.equal(dueReminders([r], at('2026-03-01T03:29:00Z')).length, 0);
++  assert.equal(dueReminders([r], at('2026-03-01T03:30:00Z')).length, 1);
++});
++
++test('a reminder west of UTC is due at its local time, not later', () => {
++  const r = reminder({ tz_offset_min: -300, due_ms: toUtcMs('2026-03-01T09:00', -300) });
++  // 09:00 UTC-5 is 14:00 UTC.
++  assert.equal(dueReminders([r], at('2026-03-01T13:59:00Z')).length, 0);
++  assert.equal(dueReminders([r], at('2026-03-01T14:00:00Z')).length, 1);
+ });
+ 
+ test('a reminder that was already sent is not due again', () => {

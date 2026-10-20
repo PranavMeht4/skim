@@ -1,0 +1,107 @@
+{
+  "arm": "skim",
+  "case": "bug-timezone",
+  "kind": "read",
+  "prompt": "Users in India (UTC+5:30) say their reminders arrive about 5 hours before the time they set. UTC users are fine. What is causing it?",
+  "wall_ms": 25484,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 22254,
+  "stop_reason": "end_turn",
+  "session_id": "99217204-ad91-4bc2-ae54-060b5a9ca6c0",
+  "total_cost_usd": 0.2722422,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 26825,
+    "cache_read_input_tokens": 114351,
+    "output_tokens": 1737,
+    "output_tokens_details": {
+      "thinking_tokens": 503
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26825,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 787,
+        "cache_read_input_tokens": 37189,
+        "cache_creation_input_tokens": 1687,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1687
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1737,
+      "cacheReadInputTokens": 114351,
+      "cacheCreationInputTokens": 26825,
+      "webSearchRequests": 0,
+      "costUSD": 0.2722422,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 503,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**IST reminders get converted to UTC twice, so they fire 5h30m early.**\n\n1. `src/api.js:8`: `toUtcMs` subtracts the offset when the reminder is created. `due_ms` is already UTC, which matches `README.md:37`.\n2. `src/scheduler.js:9`: `dueReminders` subtracts `tz_offset_min * 60_000` a second time. The comment on line 7 wrongly says `due_ms` is wall-clock time.\n3. For IST the offset is 330 min, so reminders fire **5h30m** early. That fits the \"about 5 hours\" users report. For UTC users the offset is 0, so nothing shifts.\n\n**Example:** set 09:00 IST → `due_ms` = 03:30Z → the scheduler fires at 22:00Z the previous day, which is **03:30 IST**.\n\n**Fix:** in `src/scheduler.js:9`, use `r.due_ms <= nowMs` and delete the misleading comment on line 7.\n\n**Why tests pass:** `test/scheduler.test.js:6` only uses `tz_offset_min: 0`. A test with a 330 offset would catch this.\n\nI traced this by reading the code and checked the arithmetic by hand. I didn't change any code or run the tests.\n\n**Also:** there's an SQL injection in `searchReminders` (`src/api.js:31`). `userId` and `q` are pasted straight into the SQL string. Fix: use `?` placeholders like the other queries do.",
+  "ttft_ms": 2462,
+  "type": "result",
+  "duration_ms": 22398,
+  "uuid": "a87ddef3-b565-49ba-868b-dcb82dddce92",
+  "ttft_stream_ms": 2316,
+  "time_to_request_ms": 61,
+  "first_content_frame_ms": 2316,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

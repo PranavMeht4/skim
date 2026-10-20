@@ -1,0 +1,46 @@
+diff -ruN <repo>/evals/fixture/src/retry.js <tmp>/skim-eval-skim-fix-jitter-sQGWfy/reminder-service/src/retry.js
+--- <repo>/evals/fixture/src/retry.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-jitter-sQGWfy/reminder-service/src/retry.js	2026-10-20 16:50:41
+@@ -6,7 +6,7 @@
+ export function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {
+   const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);
+   const jitter = (Math.random() - 0.5) * JITTER_MS;
+-  return exp + jitter;
++  return Math.min(maxDelayMs, Math.max(0, exp + jitter));
+ }
+ 
+ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+diff -ruN <repo>/evals/fixture/test/retry.test.js <tmp>/skim-eval-skim-fix-jitter-sQGWfy/reminder-service/test/retry.test.js
+--- <repo>/evals/fixture/test/retry.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-jitter-sQGWfy/reminder-service/test/retry.test.js	2026-10-20 16:50:33
+@@ -1,6 +1,6 @@
+ import { test, beforeEach, afterEach } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { withRetry } from '../src/retry.js';
++import { backoffDelay, withRetry } from '../src/retry.js';
+ 
+ let realRandom;
+ beforeEach(() => { realRandom = Math.random; Math.random = () => 0.5; }); // no jitter
+@@ -29,4 +29,22 @@
+     withRetry(async () => { throw new Error(`fail ${++calls}`); }, { attempts: 2, baseMs: 1 }),
+     /fail 2/,
+   );
++});
++
++test('jitter never pushes the delay below 0 or above maxDelayMs', () => {
++  const opts = { baseMs: 1, maxDelayMs: 10_000 };
++
++  Math.random = () => 0; // largest negative jitter
++  assert.equal(backoffDelay(0, opts), 0);
++
++  Math.random = () => 0.999999; // largest positive jitter
++  assert.equal(backoffDelay(20, opts), 10_000);
++
++  Math.random = realRandom;
++  for (let i = 0; i < 1000; i++) {
++    for (const attempt of [0, 5, 20]) {
++      const d = backoffDelay(attempt, opts);
++      assert.ok(d >= 0 && d <= opts.maxDelayMs, `attempt ${attempt}: ${d}`);
++    }
++  }
+ });

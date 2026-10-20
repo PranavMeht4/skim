@@ -1,0 +1,124 @@
+{
+  "arm": "skim",
+  "case": "bug-timezone",
+  "kind": "read",
+  "prompt": "Users in India (UTC+5:30) say their reminders arrive about 5 hours before the time they set. UTC users are fine. What is causing it?",
+  "wall_ms": 31302,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 28297,
+  "stop_reason": "end_turn",
+  "session_id": "1d66c5dd-4cc1-489d-8208-505d9b9243ba",
+  "total_cost_usd": 0.3248214,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 28620,
+    "cache_read_input_tokens": 187867,
+    "output_tokens": 2912,
+    "output_tokens_details": {
+      "thinking_tokens": 619
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28620,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1095,
+        "cache_read_input_tokens": 39816,
+        "cache_creation_input_tokens": 855,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 855
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2912,
+      "cacheReadInputTokens": 187867,
+      "cacheCreationInputTokens": 28620,
+      "webSearchRequests": 0,
+      "costUSD": 0.3248214,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 619,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_014NMSVDtxsGgLwggV5QLQEM",
+      "tool_input": {
+        "command": "find . -type f -not -path './node_modules/*' | head -100 && wc -l $(find . -type f -not -path './node_modules/*' -name '*.*' | head -50)",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01LdeUDeHRBt4Qy4qkiJTJyU",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { handle } from './src/api.js';\nimport { dueReminders } from './src/scheduler.js';\nfor (const [tz, off] of [['UTC',0],['IST',330]]) {\n  const { body: r } = handle({ method:'POST', path:'/reminders', body:{ userId:'u', text:'t', at:'2026-03-01T09:00', tzOffsetMin: off }});\n  const correct = Date.parse('2026-03-01T09:00:00Z') - off*60000;\n  // find earliest minute it fires\n  let t = correct - 24*3600e3; while (!dueReminders([r], t).length) t += 60000;\n  console.log(tz, 'should fire', new Date(correct).toISOString(), '| fires', new Date(t).toISOString(), '| early by', (correct - t)/60000, 'min');\n}\" && npm test 2>&1 | tail -8",
+        "description": "Reproduce early firing and run test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Cause: the timezone offset is applied twice.** Reminders fire **5h30m early** for IST, which matches the \"about 5 hours\" users report.\n\n1. **First conversion, which is correct:** `api.js:16` → `toUtcMs()` (`api.js:8`) already stores `due_ms` as **UTC** (09:00 IST → 03:30Z).\n2. **Second conversion, which is the bug:** `scheduler.js:9` subtracts `tz_offset_min` again: `r.due_ms - r.tz_offset_min * 60_000 <= nowMs`. That moves 03:30Z back to **22:00Z the previous day**, which is 03:30 IST.\n3. **Why UTC users are fine:** their offset is **0**, so subtracting it twice changes nothing.\n4. **Fix:** in `scheduler.js:9`, compare `r.due_ms <= nowMs` directly. Also correct the misleading comment at `scheduler.js:7`, which says `due_ms` is wall-clock time. It isn't.\n5. **Why tests missed it:** `test/scheduler.test.js` only uses `tz_offset_min: 0`. A test with offset **330** would have caught it.\n\n```flow\nPOST at=09:00, tzOffsetMin=330 -> toUtcMs -> due_ms=03:30Z -> scheduler subtracts 330 again -> fires 22:00Z (03:30 IST)\n```\n\n**Not verified by running:** my repro script and `npm test` were blocked by the permission prompt, so this comes from reading the code and working the numbers by hand. I made **no edits**.\n\n**Also:** there's **SQL injection** in `searchReminders` at `api.js:31`, where `userId` and `q` are concatenated straight into the SQL string. It's unrelated to this bug.",
+  "ttft_ms": 1676,
+  "type": "result",
+  "duration_ms": 28384,
+  "uuid": "5ba79e84-fda6-496e-9acb-15eeb3558c69",
+  "ttft_stream_ms": 991,
+  "time_to_request_ms": 38,
+  "first_content_frame_ms": 991,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

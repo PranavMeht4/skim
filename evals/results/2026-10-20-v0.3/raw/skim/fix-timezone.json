@@ -1,0 +1,156 @@
+{
+  "arm": "skim",
+  "case": "fix-timezone",
+  "kind": "fix",
+  "prompt": "Users east of UTC (for example India, UTC+5:30) report that reminders fire hours early. Find the cause and fix it. Add a regression test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 113995,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 112006,
+  "stop_reason": "end_turn",
+  "session_id": "ee8de754-a874-459e-bdf5-df8520878db2",
+  "total_cost_usd": 1.0191806,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 38902,
+    "cache_read_input_tokens": 556953,
+    "output_tokens": 7078,
+    "output_tokens_details": {
+      "thinking_tokens": 888
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37244,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 113,
+        "cache_read_input_tokens": 48597,
+        "cache_creation_input_tokens": 698,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 698
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 50826,
+        "output_tokens": 1925,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 791,
+        "cache_read_input_tokens": 49295,
+        "cache_creation_input_tokens": 707,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 707,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 94417,
+      "outputTokens": 11194,
+      "cacheReadInputTokens": 556953,
+      "cacheCreationInputTokens": 38902,
+      "webSearchRequests": 0,
+      "costUSD": 1.0191806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 888,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Ffp1qRHcUhHYdP9HkGAaDy",
+      "tool_input": {
+        "command": "for f in README.md config.json src/*.js; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Print README, config and all source files"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01SznJ6Cc58LN4LoJ9wcoZa2",
+      "tool_input": {
+        "command": "cd /private<tmp>/skim-eval-skim-fix-timezone-ksMp9T && rm -rf /tmp/rs-oldcheck && cp -R reminder-service /tmp/rs-oldcheck && cd /tmp/rs-oldcheck && perl -pi -e 's/r\\.due_ms <= nowMs/r.due_ms - r.tz_offset_min * 60_000 <= nowMs/' src/scheduler.js && grep -n 'due_ms' src/scheduler.js && node --test test/ 2>&1 | grep -E '^(not ok|# (pass|fail))'; rm -rf /tmp/rs-oldcheck",
+        "description": "Run new tests against the old buggy scheduler in a temp copy"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 26,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Fixed: the timezone offset was applied twice. 13/13 tests pass.**\n\n- **Cause:** `api.js:8` already converts the user's local time to UTC when it stores `due_ms`. Then `src/scheduler.js:9` subtracted `tz_offset_min` a second time. For IST (+330) that made reminders fire **5.5h early**.\n- **West of UTC too:** the same bug made reminders fire **late** for users west of UTC. A user at −300 got them 5h late.\n- **Fix:** `src/scheduler.js:10` is now `!r.sent && r.due_ms <= nowMs`. The comment above it was wrong (it said `due_ms` is wall-clock time), so I corrected it.\n- **No data migration needed:** the stored `due_ms` values were always correct. Pending reminders will fire on time once this is deployed. Reminders that already fired early stay marked as sent.\n\n**Regression tests:** I added 2 to `test/scheduler.test.js`. Each creates a reminder through the real `handle` POST path, then checks it with `dueReminders`:\n- 09:00 at +330 is not due at 22:00Z the night before or at 03:29Z, and is due at 03:30Z.\n- 09:00 at −300 is not due at 13:59Z, and is due at 14:00Z.\n\n**Checked against the old code:** copying the project to a temp folder needed approval, so I put the buggy line back in place for one run and then restored the fix. With the old line:\n```\nnot ok 12 - 09:00 IST (+330) fires at 03:30Z, not earlier\n  expected: 0\n  actual: 1\nnot ok 13 - 09:00 EST (-300) fires at 14:00Z, not later\n  expected: 1\n  actual: 0\n# pass 11\n# fail 2\n```\nWith the fix, `node --test test/` gives:\n```\n# tests 13\n# pass 13\n# fail 0\n```\n\n**Also:**\n- **SQL injection** in `searchReminders` (`api.js:31`): `q.userId` and `q.q` are pasted straight into the SQL string. I didn't touch it.\n- Each reminder stores one fixed `tz_offset_min`, so it can't follow daylight saving. A reminder set before a clock change will be an hour off after it. IST has no daylight saving, so India isn't affected.",
+  "ttft_ms": 1807,
+  "type": "result",
+  "duration_ms": 112792,
+  "uuid": "c6cfd84d-cd4b-49a6-981b-e08ba87055d6",
+  "ttft_stream_ms": 1250,
+  "time_to_request_ms": 27,
+  "first_content_frame_ms": 1250,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}

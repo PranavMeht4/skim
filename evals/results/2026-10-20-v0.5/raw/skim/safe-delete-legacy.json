@@ -1,0 +1,124 @@
+{
+  "arm": "skim",
+  "case": "safe-delete-legacy",
+  "kind": "read",
+  "prompt": "Is it safe to delete src/legacy.js?",
+  "wall_ms": 38644,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 37351,
+  "stop_reason": "end_turn",
+  "session_id": "dc128975-91c3-49fb-8243-4d703c1e890f",
+  "total_cost_usd": 0.3576264,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 30194,
+    "cache_read_input_tokens": 194432,
+    "output_tokens": 3857,
+    "output_tokens_details": {
+      "thinking_tokens": 1164
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30194,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 918,
+        "cache_read_input_tokens": 41900,
+        "cache_creation_input_tokens": 345,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 345
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3857,
+      "cacheReadInputTokens": 194432,
+      "cacheCreationInputTokens": 30194,
+      "webSearchRequests": 0,
+      "costUSD": 0.3576264,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1164,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_014KE4TSbaZQS4M7RsPYEYR9",
+      "tool_input": {
+        "command": "set -e\nSRC=<tmp>/skim-eval-skim-safe-delete-legacy-PnzfHe/reminder-service\nTMP=$(mktemp -d)\ncp -R \"$SRC\" \"$TMP/rs\"\nrm \"$TMP/rs/src/legacy.js\"\ncd \"$TMP/rs\"\necho \"== tests without legacy.js ==\"\nnode --test test/ 2>&1 | grep -E '^# (tests|pass|fail)'\necho \"== send() with config formatter ==\"\nnode --input-type=module -e \"\nimport { send } from './src/notify.js';\ntry { await send({user_id:'u1',text:'t',at:'2026-03-01T09:00'}, {formatter:'legacy'}); console.log('OK'); }\ncatch (e) { console.log(e.code, '|', e.message.replace(process.cwd(), '<repo>').replace(process.cwd(), '<repo>')); }\n\"\nrm -rf \"$TMP\"",
+        "description": "Simulate deletion in a temp copy and run tests"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_018Pua8fotwAAVUuNVSecXe2",
+      "tool_input": {
+        "command": "TMP=$(mktemp -d) && cp -R <tmp>/skim-eval-skim-safe-delete-legacy-PnzfHe/reminder-service \"$TMP/rs\" && rm \"$TMP/rs/src/legacy.js\" && echo \"$TMP\"",
+        "description": "Copy project to temp dir and remove legacy.js there"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 15,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**No — deleting `src/legacy.js` would break every reminder delivery in production.** (Only a static read; my attempt to simulate the deletion in a temp copy was blocked by the sandbox.)\n\n1. **It's still the live formatter:** `config.json:3` sets `\"formatter\": \"legacy\"`, and `src/index.js:6` passes that value to the scheduler.\n2. **It's loaded by name, so grep won't find it:** `src/notify.js:8` does `` import(`./${name}.js`) ``, and `src/notify.js:14` also **defaults** to `'legacy'`.\n3. **The failure is silent:** each due reminder would retry **5 times** (`scheduler.js:16`), fail, get logged, and **never** be marked sent. It is retried every 30s tick, forever.\n4. **Tests won't catch it:** `test/notify.test.js:8` only uses `formatter: 'format'`, so the suite passes either way.\n\n**To remove it safely:**\n1. **Confirm the consumers** of the pipe format (`REMIND|user|at|text`) have moved to the new format. The TODO at `legacy.js:2` says it's waiting on exactly that. I can't check this from the repo, and it isn't a git repo, so there's no history to check either.\n2. Set `config.json` `\"formatter\"` to **`\"format\"`**. This changes the message format in production.\n3. Change the default in `notify.js:14` to **`'format'`**.\n4. Delete `src/legacy.js` and the line for it in `README.md:28`.",
+  "ttft_ms": 1856,
+  "type": "result",
+  "duration_ms": 37444,
+  "uuid": "da904e4c-0525-4724-9aa3-8847efdeec21",
+  "ttft_stream_ms": 1106,
+  "time_to_request_ms": 23,
+  "first_content_frame_ms": 1107,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

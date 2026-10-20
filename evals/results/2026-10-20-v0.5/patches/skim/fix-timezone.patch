@@ -1,0 +1,56 @@
+diff -ruN <repo>/evals/fixture/src/scheduler.js <tmp>/skim-eval-skim-fix-timezone-bAYnmC/reminder-service/src/scheduler.js
+--- <repo>/evals/fixture/src/scheduler.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-timezone-bAYnmC/reminder-service/src/scheduler.js	2026-10-20 17:28:20
+@@ -4,9 +4,9 @@
+ import { withRetry } from './retry.js';
+ 
+ // A reminder is due once its time has arrived and it has not been sent.
+-// due_ms is the user's wall-clock time, so shift it back to UTC with their offset.
++// due_ms is already UTC (api.js applies the user's offset on create), so compare it directly.
+ export function dueReminders(reminders, nowMs) {
+-  return reminders.filter((r) => !r.sent && r.due_ms - r.tz_offset_min * 60_000 <= nowMs);
++  return reminders.filter((r) => !r.sent && r.due_ms <= nowMs);
+ }
+ 
+ export async function tick(nowMs = Date.now(), opts = {}) {
+diff -ruN <repo>/evals/fixture/test/scheduler.test.js <tmp>/skim-eval-skim-fix-timezone-bAYnmC/reminder-service/test/scheduler.test.js
+--- <repo>/evals/fixture/test/scheduler.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-timezone-bAYnmC/reminder-service/test/scheduler.test.js	2026-10-20 17:28:06
+@@ -1,6 +1,8 @@
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { dueReminders } from '../src/scheduler.js';
++import { dueReminders, tick } from '../src/scheduler.js';
++import { handle } from '../src/api.js';
++import { reset } from '../src/db.js';
+ 
+ const at = (iso) => Date.parse(iso);
+ const reminder = (over) => ({ id: 1, sent: 0, tz_offset_min: 0, due_ms: at('2026-03-01T09:00:00Z'), ...over });
+@@ -15,3 +17,27 @@
+   const r = reminder({ sent: 1 });
+   assert.equal(dueReminders([r], at('2026-03-02T00:00:00Z')).length, 0);
+ });
++
++// Regression: due_ms is already UTC, so the scheduler must not apply the offset again.
++// Before the fix, a 09:00 IST reminder fired at 22:00 UTC the day before (5h30m early).
++for (const { name, tzOffsetMin, utc } of [
++  { name: 'east of UTC (IST)', tzOffsetMin: 330, utc: '2026-03-01T03:30:00Z' },
++  { name: 'west of UTC (UTC-5)', tzOffsetMin: -300, utc: '2026-03-01T14:00:00Z' },
++]) {
++  test(`a reminder created ${name} fires at the user's local time, not before`, async () => {
++    reset();
++    handle({
++      method: 'POST',
++      path: '/reminders',
++      body: { userId: 'u1', text: 'call mum', at: '2026-03-01T09:00', tzOffsetMin },
++    });
++    const sent = [];
++    const out = (msg) => sent.push(msg);
++
++    await tick(at(utc) - 60_000, { out });
++    assert.equal(sent.length, 0, 'fired before the user\'s local time');
++
++    await tick(at(utc), { out });
++    assert.equal(sent.length, 1, 'did not fire at the user\'s local time');
++  });
++}

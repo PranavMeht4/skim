@@ -1,0 +1,139 @@
+{
+  "arm": "default",
+  "case": "jitter-correct",
+  "kind": "read",
+  "prompt": "Why does retry.js add jitter, and is its implementation right?",
+  "wall_ms": 73095,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 71614,
+  "stop_reason": "end_turn",
+  "session_id": "bfe8c1b8-fdaf-4b42-9863-dfb24bc155e2",
+  "total_cost_usd": 0.4863632,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 24715,
+    "cache_read_input_tokens": 141341,
+    "output_tokens": 3227,
+    "output_tokens_details": {
+      "thinking_tokens": 1415
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23728,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 68,
+        "cache_read_input_tokens": 34230,
+        "cache_creation_input_tokens": 1540,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1540
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 36259,
+        "output_tokens": 2686,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 1356,
+        "cache_read_input_tokens": 35770,
+        "cache_creation_input_tokens": 987,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 987,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 36269,
+      "outputTokens": 5913,
+      "cacheReadInputTokens": 141341,
+      "cacheCreationInputTokens": 24715,
+      "webSearchRequests": 0,
+      "costUSD": 0.4863632,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1415,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01DufXDcNoRhqHvQizV4K3de",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { backoffDelay } from '/private<tmp>/skim-eval-default-jitter-correct-xEHmz8/reminder-service/src/retry.js';\nconst N = 100000;\nfor (const a of [0,1,2,6,10]) {\n  let neg = 0, min = Infinity, max = -Infinity;\n  for (let i = 0; i < N; i++) { const d = backoffDelay(a); if (d <= 0) neg++; min = Math.min(min,d); max = Math.max(max,d); }\n  console.log('attempt', a, 'range', min.toFixed(0), '..', max.toFixed(0), ' <=0:', (100*neg/N).toFixed(1)+'%');\n}\n\"",
+        "description": "Sample backoff delays to check jitter range"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The jitter is there for a good reason, but the implementation is broken: in the default setup it often removes the backoff it's meant to randomize.\n\n**Why it's there.** The comment in `src/retry.js` gives the reason, and it's sound. If a downstream outage makes many reminder sends fail at once, they would all retry on the same 200 ms → 400 ms → … schedule. That sends synchronized bursts at the service just as it tries to recover (a \"thundering herd\"). Random jitter spreads those retries out.\n\n**What's wrong.** `src/retry.js:8` adds a fixed ±500 ms, no matter how large the delay is:\n\n```js\nconst jitter = (Math.random() - 0.5) * JITTER_MS;   // uniform in [-500, 500)\n```\n\nWith the default `baseMs = 200`:\n\n| Attempt | Base delay | Actual delay range | Chance the delay is ≤ 0 |\n|---|---|---|---|\n| 0 | 200 | -300 … 700 | ~30% |\n| 1 | 400 | -100 … 900 | ~10% |\n| 2+ | 800+ | always positive | 0% |\n\nThe default `attempts = 3` means only attempts 0 and 1 ever wait before retrying (`attempt < attempts - 1`). So both waits in the default config are affected; this isn't an edge case. Node's `setTimeout` turns any delay below 1 ms into 1 ms, so every negative draw becomes an immediate retry. Those retries all land at the same moment, which is the synchronized burst jitter was supposed to prevent, and they skip the backoff entirely.\n\nTwo smaller problems:\n- **The cap isn't a cap.** The jitter is added after `Math.min(maxDelayMs, …)`, so a delay can reach about 10,500 ms.\n- **The spread is weakest where it matters most.** At the 10 s cap, ±500 ms is only ±5%, so clients that have backed off all the way still retry almost together.\n\n**Why the tests don't catch it.** `test/retry.test.js:6` sets `Math.random` to always return 0.5, which makes the jitter exactly 0. Nothing tests `backoffDelay` directly, so the tests only check how many times it retries, not how long it waits.\n\n**Suggested fix.** Make the jitter proportional to the delay and keep the result within the cap. I'd use \"full jitter\" (a random delay anywhere between 0 and the backoff). It spreads retries evenly instead of piling some up at zero:\n\n```js\nexport function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {\n  const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);\n  return Math.random() * exp;   // uniform in [0, exp), never negative, never above the cap\n}\n```\n\nIf you want every retry to wait at least some time, use \"equal jitter\" instead: `exp / 2 + Math.random() * (exp / 2)`. Either way, `JITTER_MS` goes away. I'd also add a `backoffDelay` test that sets `Math.random` to `0` and then to `0.999` and checks the result stays between `0` and `maxDelayMs`.\n\nI couldn't run a quick sampling script because the command needed approval, so the percentages above are worked out by hand from the formula. I haven't changed any files. Say if you want me to apply the fix and add the test.",
+  "ttft_ms": 2791,
+  "type": "result",
+  "duration_ms": 71703,
+  "uuid": "4389b3c7-3344-49be-91f5-08892cea34d7",
+  "ttft_stream_ms": 2646,
+  "time_to_request_ms": 30,
+  "first_content_frame_ms": 2646,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,139 @@
+{
+  "arm": "skim",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 161784,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 158566,
+  "stop_reason": "end_turn",
+  "session_id": "69c270c2-f831-4412-b006-99aaa09bd08a",
+  "total_cost_usd": 0.8050056,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 35095,
+    "cache_read_input_tokens": 200788,
+    "output_tokens": 8258,
+    "output_tokens_details": {
+      "thinking_tokens": 5523
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 32039,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2152,
+        "cache_read_input_tokens": 42198,
+        "cache_creation_input_tokens": 1892,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1892
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 44407,
+        "output_tokens": 7521,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 1065,
+        "cache_read_input_tokens": 44090,
+        "cache_creation_input_tokens": 3056,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 3056,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 44419,
+      "outputTokens": 15779,
+      "cacheReadInputTokens": 200788,
+      "cacheCreationInputTokens": 35095,
+      "webSearchRequests": 0,
+      "costUSD": 0.8050056,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5523,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01JcEnKgZeWH8T5x6qxkPPNG",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { handle, toUtcMs } from './src/api.js';\nimport { dueReminders } from './src/scheduler.js';\nimport { queryLog } from './src/db.js';\nconst c = (b) => handle({ method: 'POST', path: '/reminders', body: b });\nconsole.log('seconds:', c({ userId:'u1', text:'a', at:'2026-03-01T09:00:00' }));\nconsole.log('Z suffix:', c({ userId:'u1', text:'a', at:'2026-03-01T09:00Z' }).body.due_ms);\nconsole.log('garbage:', c({ userId:'u1', text:'a', at:'tomorrow' }).status);\nconst r = c({ userId:'u1', text:'call mum', at:'2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconsole.log('IST due_ms', new Date(r.due_ms).toISOString());\nfor (const t of ['2026-02-28T22:00:00Z','2026-03-01T03:30:00Z']) console.log('due at', t, dueReminders([r], Date.parse(t)).length);\ntry { console.log(handle({ method:'GET', path:'/reminders/search', query:{ userId:'u1', q:'milk and eggs' } })); } catch (e) { console.log('search threw:', e.message); }\nhandle({ method:'GET', path:'/reminders/search', query:{ userId:\\\"x' OR '1'='1\\\", q:'' } });\nconsole.log('sql:', queryLog.at(-1).sql);\ntry { handle({ method:'GET', path:'/reminders' }); } catch (e) { console.log('list no query threw:', e.message); }\n\"",
+        "description": "Probe api.js edge cases against the in-memory DB"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**3 real problems in `api.js`; the worst bug, though, is in how `scheduler.js` reads what `api.js` stores.** I couldn't run anything (the command was denied), so all of this comes from **reading the code** and none of it is executed.\n\n1. **SQL injection in search** (`api.js:31`): `userId` and `q` are pasted straight into the SQL string.\n   - **Today:** a search containing \" and \" (e.g. `\"milk and eggs\"`) **would throw**, uncaught. `db.js:29` splits the SQL on `AND`, which leaves an unsupported condition (`text LIKE '%milk`). **No rows leak today**: the stand-in compares `x' OR '1'='1` as a plain `user_id`.\n   - **Once `db.js` becomes a real DB** (the README needs this so data survives restarts): it's classic injection. Even an innocent `\"mum's\"` breaks the query.\n   - **Fix:** `query('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [q.userId, \\`%${q.q}%\\`])`.\n2. **Bad `at` or `tzOffsetMin` is accepted** (`api.js:13-16`): only presence is checked.\n   - `at: 'tomorrow'` or `tzOffsetMin: 'abc'` → `due_ms = NaN` → **201 Created**.\n   - The scheduler's `NaN <= now` is always false, so the reminder **never fires, and nothing reports an error**.\n   - **Fix:** match `at` against `/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/`, require an integer offset between -720 and 840, and return 400 unless `Number.isFinite(dueMs)`.\n3. **The API trusts whatever identity the caller sends** (`api.js:25, 31, 35-38`):\n   - list and search take any `userId` from the query string.\n   - delete takes **only an id**, and ids are **sequential** (`db.js:39`), so a simple loop deletes everything.\n   - This matters **only if no auth layer** sits in front. Adding `AND user_id = ?` to delete makes it consistent with the others, but it **isn't real security**.\n\n**Also:**\n- **Timezone is applied twice:** `api.js` stores `due_ms` already in UTC, which matches the README. `scheduler.js:9` then subtracts `tz_offset_min` again.\n  - IST (+330) reminders fire **5.5h early**; US Eastern (-300) fires **5h late**.\n  - **Fix `scheduler.js:9` to `r.due_ms <= nowMs`.** **Don't touch `toUtcMs`**: it's correct, and `api.test.js:12-13` pins it.\n  - Tests miss it because the scheduler test and the create test both use **only offset 0**.\n- **There's no search test at all**, which is why the \" and \" crash went unnoticed.\n- `index.js` **never imports `api.js`** and there's no HTTP server, so none of the API is reachable yet.",
+  "ttft_ms": 2311,
+  "type": "result",
+  "duration_ms": 158686,
+  "uuid": "12f885ee-c6f3-4769-a729-4c241d3f43aa",
+  "ttft_stream_ms": 878,
+  "time_to_request_ms": 57,
+  "first_content_frame_ms": 878,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

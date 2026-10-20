@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "skim",
+  "description": "Make agent replies fast to read.",
+  "owner": {
+    "name": "Pranav Mehta",
+    "url": "https://github.com/PranavMeht4"
+  },
+  "plugins": [
+    {
+      "name": "skim",
+      "description": "Answer first, the right shape per content, bold anchors.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "arm": "skim",
+  "case": "compare-storage",
+  "kind": "read",
+  "prompt": "Reminders are lost when the process restarts. Compare realistic ways to make storage persistent and recommend one.",
+  "wall_ms": 161145,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 158095,
+  "stop_reason": "end_turn",
+  "session_id": "c88772f1-1774-4282-bfed-e50ee433e41b",
+  "total_cost_usd": 0.8219229000000001,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 38573,
+    "cache_read_input_tokens": 324412,
+    "output_tokens": 9734,
+    "output_tokens_details": {
+      "thinking_tokens": 5884
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35524,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 4158,
+        "cache_read_input_tokens": 46922,
+        "cache_creation_input_tokens": 653,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 653
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 45597,
+      "outputTokens": 13544,
+      "cacheReadInputTokens": 324412,
+      "cacheCreationInputTokens": 38573,
+      "webSearchRequests": 0,
+      "costUSD": 0.8175874000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5884,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-haiku-5-5": {
+      "inputTokens": 41135,
+      "outputTokens": 444,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "webSearchRequests": 0,
+      "costUSD": 0.0043355,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 252,
+      "canonicalModel": "claude-haiku-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01SWQSVaca1t9u5KjQ671DnL",
+      "tool_input": {
+        "command": "for f in README.md config.json src/*.js; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Show README, config, and all source files"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01NL9aCBKiuvoWHp3AouxsPY",
+      "tool_input": {
+        "command": "cat -n src/retry.js src/notify.js test/api.test.js test/scheduler.test.js; node --version; node -e \"import('node:sqlite').then(m=>{const db=new m.DatabaseSync(':memory:');console.log('node:sqlite ok', db.prepare('select sqlite_version() v').get())}).catch(e=>console.log('no sqlite',e.message))\"; npm test 2>&1 | tail -15",
+        "description": "Show retry, notify, tests; check Node sqlite support; run tests"
+      }
+    },
+    {
+      "tool_name": "WebFetch",
+      "tool_use_id": "toolu_01VGnwNBhMM3hqVFMsinN3r5",
+      "tool_input": {
+        "url": "https://github.com/nodejs/release",
+        "prompt": "List the end-of-life dates for Node.js 20, 22, and 24, and which versions are Active LTS or Maintenance LTS now."
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 17,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Use a JSON file, rewritten atomically on every change.**\n- **Why it wins:** it fits every limit in the README and runs on Node 20 (README.md:14)\n- **Cost:** about 25 lines in `db.js`. Callers and SQL strings stay the same (src/db.js:4)\n- **Must handle:** save `nextId`, write via temp file → fsync → rename, keep tests in memory\n- **Later:** Node 20 is past end-of-life. After upgrading, move to the built-in `node:sqlite`\n- **Also:** IST reminders fire 5.5h early because the offset is applied twice (src/scheduler.js:9)\n\n───\n\n**Options compared**\n\n| Option | Fits the README? | Work | Verdict |\n|---|---|---|---|\n| JSON file, atomic rename | Yes: Node 20, no deps | ~25 lines in `db.js` | **Use now** |\n| `node:sqlite` (built in) | Needs Node ≥22.13 | Rewrite `db.js`, fix search | Use after upgrade |\n| `better-sqlite3` | First dependency, native build | Same as above, plus npm | Only if stuck on Node 20 |\n| Append-only JSONL log | Yes | Log, replay, compaction | More work, no gain at 5k rows |\n| Postgres / Redis | No: needs a server | High | Ruled out (README.md:17) |\n\n**Why a plain file is enough here**\n- 5,000 rows is roughly 1 MB of JSON. That's my estimate; I didn't measure it. Rewriting it on each change is cheap.\n- The rename is atomic, so a crash leaves either the old file or the new one, never half of each.\n- There is only one process, so nothing else ever writes to the file.\n- Move to SQLite if a second process appears or the data grows by orders of magnitude.\n\n**Sketch** (`index.js` calls `open(config.dbPath)`. Tests never call it, so they stay in memory and `reset()` can't wipe real data.)\n\n```js\nimport { readFileSync, writeFileSync, renameSync, openSync, fsyncSync, closeSync, existsSync } from 'node:fs';\n\nlet file = null;\n\nexport function open(path) {\n  file = path;\n  if (!existsSync(file)) return;\n  const data = JSON.parse(readFileSync(file, 'utf8'));\n  rows.push(...data.rows);\n  nextId = data.nextId;            // or max(id) + 1, otherwise ids collide\n}\n\nfunction save() {\n  if (!file) return;\n  const tmp = `${file}.tmp`;\n  const fd = openSync(tmp, 'w');\n  writeFileSync(fd, JSON.stringify({ nextId, rows }));\n  fsyncSync(fd);\n  closeSync(fd);\n  renameSync(tmp, file);\n}\n// call save() after every INSERT, UPDATE and DELETE that changes a row\n```\n\nFor full safety against power loss, also fsync the directory after the rename.\n\n**New behaviour once data survives restarts**\n- **Duplicate sends:** if the process crashes between `send` and `UPDATE ... sent = 1`, that reminder goes out again after restart (src/scheduler.js:16). For reminders, that's acceptable.\n- **Late catch-up:** reminders that came due while the service was down are sent on the first tick after restart, about 30s after start.\n\n**Before any SQLite option**\n- **SQL injection:** `searchReminders` builds SQL by joining strings (src/api.js:31). Today the toy matcher only supports `AND`, which limits the damage. Real SQLite would allow full injection, so parameterize this query first.\n- **Test hooks:** keep `reset()` and `queryLog` in the wrapper, because `api.test.js` uses `reset()`.\n\n**Scheduler bug (from reading the code, not from running it)**\n- `due_ms` is already UTC (src/api.js:7). Line 9 subtracts `tz_offset_min` again.\n- Result: IST (+330) reminders fire 5.5h early, and UTC−5 reminders fire 5h late.\n- The tests only use offset 0 (test/scheduler.test.js:6), so they miss it. The fix is `r.due_ms <= nowMs`.\n\n**Assumptions and what I didn't check**\n- **Node version:** this machine runs v20.19.0. I don't know what the VM runs.\n- **Node 20 end-of-life:** 2026-04-30, from the published schedule. My fetch of the release page was blocked, so I didn't re-check it.\n- **`node:sqlite` status:** the current docs (v26.12.0) list it as release candidate (stability 1.2) since v25.7.0. It hasn't needed a flag since v22.13.0 / v23.4.0, but on those versions it was still marked experimental. I didn't check whether the 22 or 24 LTS lines carry the release-candidate label.",
+  "ttft_ms": 3390,
+  "type": "result",
+  "duration_ms": 158176,
+  "uuid": "8f91f2fa-97c1-447f-8093-c8ab3c96a7f5",
+  "ttft_stream_ms": 3175,
+  "time_to_request_ms": 43,
+  "first_content_frame_ms": 3175,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

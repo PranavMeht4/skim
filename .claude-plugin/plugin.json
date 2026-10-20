@@ -1,0 +1,19 @@
+{
+  "name": "skim",
+  "version": "0.6.0",
+  "description": "Replies you can skim: answer first, the right shape for each kind of content (table, diagram, list, one line), bold anchors. Meant to change how Claude presents work, not how it works.",
+  "author": {
+    "name": "Pranav Mehta",
+    "url": "https://github.com/PranavMeht4"
+  },
+  "repository": "https://github.com/PranavMeht4/skim",
+  "license": "MIT",
+  "keywords": [
+    "readability",
+    "output-style",
+    "tldr",
+    "bluf",
+    "skimmable"
+  ],
+  "types": "./types/index.d.ts"
+}

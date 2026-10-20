@@ -1,0 +1,3962 @@
+{
+  "judgeModel": "sonnet",
+  "passes": 3,
+  "firstN": 12,
+  "cost": 1.1453853999999997,
+  "failed": 0,
+  "judged": {
+    "default/lookup-retries": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/lookup-retries": {
+      "full": [
+        true,
+        false,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/lookup-retries": {
+      "full": [
+        true,
+        false,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/flow-create-to-delivery": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "firstLineAnswers": false,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "concise/flow-create-to-delivery": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "skim/flow-create-to-delivery": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/bug-timezone": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "concise/bug-timezone": {
+      "full": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/bug-timezone": {
+      "full": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/compare-storage": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/compare-storage": {
+      "full": [
+        false,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 0.6666666666666666,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "skim/compare-storage": {
+      "full": [
+        true,
+        false,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/review-api": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        false
+      ],
+      "firstLineAnswers": false,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "concise/review-api": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/review-api": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "default/plan-quiet-hours": {
+      "full": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/plan-quiet-hours": {
+      "full": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/plan-quiet-hours": {
+      "full": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/safe-delete-legacy": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/safe-delete-legacy": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/safe-delete-legacy": {
+      "full": [
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/jitter-correct": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "concise/jitter-correct": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "skim/jitter-correct": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/overview": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "firstLineAnswers": false,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": false
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/overview": {
+      "full": [
+        false,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "skim/overview": {
+      "full": [
+        false,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        false,
+        true
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              false,
+              false,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              false,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "default/test-gaps": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              false,
+              true,
+              false,
+              true
+            ]
+          }
+        }
+      ]
+    },
+    "concise/test-gaps": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        false,
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              false,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    },
+    "skim/test-gaps": {
+      "full": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "first12": [
+        true,
+        true,
+        true,
+        false
+      ],
+      "firstLineAnswers": true,
+      "passesUsed": {
+        "full": 3,
+        "first12": 3
+      },
+      "agreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "rawPasses": [
+        {
+          "pass": 0,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "first12",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "full",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              true
+            ],
+            "first_line_answers": true
+          }
+        },
+        {
+          "pass": 0,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 1,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        },
+        {
+          "pass": 2,
+          "mode": "rows24",
+          "value": {
+            "facts": [
+              true,
+              true,
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "extraJudgeCost": 0.5195715999999999,
+  "extraModes": [
+    "rows24"
+  ]
+}

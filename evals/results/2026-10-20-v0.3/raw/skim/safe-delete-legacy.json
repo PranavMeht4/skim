@@ -1,0 +1,132 @@
+{
+  "arm": "skim",
+  "case": "safe-delete-legacy",
+  "kind": "read",
+  "prompt": "Is it safe to delete src/legacy.js?",
+  "wall_ms": 44833,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 42919,
+  "stop_reason": "end_turn",
+  "session_id": "e65c46f7-3024-4c7c-a3e9-2aacdb19b71d",
+  "total_cost_usd": 0.3625438,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 28623,
+    "cache_read_input_tokens": 300639,
+    "output_tokens": 3668,
+    "output_tokens_details": {
+      "thinking_tokens": 901
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28623,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 613,
+        "cache_read_input_tokens": 40230,
+        "cache_creation_input_tokens": 444,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 444
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 3668,
+      "cacheReadInputTokens": 300639,
+      "cacheCreationInputTokens": 28623,
+      "webSearchRequests": 0,
+      "costUSD": 0.3625438,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 901,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01G7hq48dTbUxe4Tu2T6vymx",
+      "tool_input": {
+        "command": "for f in src/legacy.js src/index.js src/api.js src/scheduler.js src/notify.js src/format.js src/db.js src/retry.js config.json README.md; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Show all source files, config and README"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WUUztfb83fcGekQMea1WZF",
+      "tool_input": {
+        "command": "T=$(mktemp -d) && cp -R /private<tmp>/skim-eval-skim-safe-delete-legacy-CA9ins/reminder-service/. \"$T\"/ && rm \"$T/src/legacy.js\" && cd \"$T\" && npm test 2>&1 | grep -E '^# (pass|fail)' ; node --input-type=module -e \"import { send } from '$T/src/notify.js'; try { await send({user_id:'u1',text:'x',at:'t'}); } catch (e) { console.log(e.code + ': ' + e.message.split('\\n')[0]); }\"",
+        "description": "In a temp copy, delete legacy.js, run tests and the default send"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01KgyGpfaAXMyymHk2vaNES8",
+      "tool_input": {
+        "command": "rm -rf /tmp/legacy-check && cp -R /private<tmp>/skim-eval-skim-safe-delete-legacy-CA9ins/reminder-service /tmp/legacy-check && rm /tmp/legacy-check/src/legacy.js && cd /tmp/legacy-check && npm test 2>&1 | grep -E '^# (tests|pass|fail)'",
+        "description": "Copy project, delete legacy.js in the copy, run tests"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**No, not yet.** Production loads it by name, so grepping for `legacy.js` finds nothing.\n\n```\nconfig.json:3        \"formatter\": \"legacy\"\n  → index.js:6       startScheduler({ formatter: config.formatter })\n  → scheduler.js:16  send(r, opts)\n  → notify.js:8      await import(`./${name}.js`)   → ./legacy.js\n```\n\n`notify.js:14` also uses `'legacy'` as the default formatter.\n\n**If you delete it now,** every send fails with a module-not-found error. Each one is retried 5 times (`scheduler.js:16`), then caught and only logged (`scheduler.js:20`). The service keeps running, but **no reminders are delivered**, and they pile up unsent.\n\n**Tests won't catch this.** `test/notify.test.js:8` only exercises `formatter: 'format'`.\n\n**To remove it safely:**\n1. Set `config.json:3` to `\"formatter\": \"format\"`.\n2. Change the default at `notify.js:14` to `'format'`.\n3. Remove the line at `README.md:28`.\n4. Delete `src/legacy.js`.\n\n⚠ **Risk:** Step 1 changes what the service outputs. The old format is `REMIND|u1|<at>|<text>`; the new one is `Reminder for u1: <text> (set for <at>)`. The TODO at `legacy.js:2` says to remove the file \"once everyone is on the new format\", so something downstream may still parse the pipe format. The repo can't tell me whether those consumers have moved, so check with them first.\n\n**Not verified:** I didn't run the deletion, even on a temp copy, because that command was blocked. The failure above is read from the code, not observed.",
+  "ttft_ms": 2016,
+  "type": "result",
+  "duration_ms": 43704,
+  "uuid": "35a7e977-e60b-4028-8a7a-4f51231ec801",
+  "ttft_stream_ms": 1830,
+  "time_to_request_ms": 242,
+  "first_content_frame_ms": 1831,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

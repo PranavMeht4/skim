@@ -1,0 +1,7 @@
+review	Review src/api.js. What are the real problems?
+bug	Users in India say their reminders arrive about 5 hours early. UTC users are fine. What is causing it?
+fix	Fix the SQL injection in search, add a test for it, and run the tests.
+diagram	Draw a diagram of how a reminder moves from the API call to delivery.
+chart	Show the retry waits from retry.js as a chart, with the jitter range.
+compare	Compare realistic ways to make storage persistent and recommend one.
+charts	Print the contents of demo.md exactly as your whole reply, with no other text.

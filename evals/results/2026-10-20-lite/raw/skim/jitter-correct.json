@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "jitter-correct",
+  "kind": "read",
+  "prompt": "Why does retry.js add jitter, and is its implementation right?",
+  "wall_ms": 33007,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 29919,
+  "stop_reason": "end_turn",
+  "session_id": "c50f1d3b-7c4f-4576-810d-ad83ac7fe9de",
+  "total_cost_usd": 0.25662379999999996,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 23892,
+    "cache_read_input_tokens": 110779,
+    "output_tokens": 2165,
+    "output_tokens_details": {
+      "thinking_tokens": 801
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23892,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 757,
+        "cache_read_input_tokens": 34760,
+        "cache_creation_input_tokens": 1183,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1183
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2165,
+      "cacheReadInputTokens": 110779,
+      "cacheCreationInputTokens": 23892,
+      "webSearchRequests": 0,
+      "costUSD": 0.25662379999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 801,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Q2F4D5imT7Y3bRt17pdoyi",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { backoffDelay } from './src/retry.js';\nfor (const a of [0,1,2,3,6]) {\n  const N=100000; let neg=0, min=Infinity, max=-Infinity;\n  for (let i=0;i<N;i++){ const d=backoffDelay(a); if(d<=0)neg++; min=Math.min(min,d); max=Math.max(max,d); }\n  console.log('attempt',a,'min',min.toFixed(0),'max',max.toFixed(0),'<=0:',(100*neg/N).toFixed(1)+'%');\n}\"",
+        "description": "Simulate backoff delays to measure the jitter spread"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Jitter is there to stop many failing sends from retrying at the same moment (a thundering herd). The idea is right, but the implementation is not: it adds a fixed ±500 ms, not an amount that scales with the delay.**\n\n1. **Delays can be negative** (`src/retry.js:8-9`). With the default `baseMs = 200`, the first retry lands anywhere from **−300 to 700 ms**. About **30%** of first retries and **10%** of second retries come out ≤ 0. Node's `setTimeout` treats those as about 1 ms, so they all fire at once. That re-creates the very burst jitter is supposed to prevent.\n2. **The jitter shrinks relative to the delay.** At the 10 s cap, ±500 ms is only **±5%**, so late retries still cluster.\n3. **The cap is exceeded.** The delay can reach `maxDelayMs + 500` (**10.5 s**).\n4. **The jitter ignores `baseMs`.** With `baseMs: 1`, almost the whole delay is noise. The tests hide this by pinning `Math.random = () => 0.5` (`test/retry.test.js:6`), so **no test checks the jitter at all**.\n\n**Fix:** use \"full jitter\" (AWS's standard approach). The delay then always stays between 0 and the cap, and the spread grows with the backoff:\n```js\nexport function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {\n  const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);\n  return Math.random() * exp;\n}\n```\nAfter this change, `Math.random = () => 0.5` gives half the exponential delay instead of no jitter. The existing tests still pass that way, but the \"no jitter\" comment would be wrong.\n\nI worked out the numbers above by hand. My simulation script was blocked at the approval prompt, and I did **not** run the test suite.\n\n**Also:**\n- `withRetry` retries **every** error, including ones that will never succeed, such as 4xx responses.\n- `attempts: 0` makes it throw `undefined`.",
+  "ttft_ms": 3691,
+  "type": "result",
+  "duration_ms": 29991,
+  "uuid": "b8d393cc-ab35-44b7-a119-4fb900ae8eee",
+  "ttft_stream_ms": 3457,
+  "time_to_request_ms": 35,
+  "first_content_frame_ms": 3458,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

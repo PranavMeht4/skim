@@ -1,0 +1,155 @@
+{
+  "arm": "skim",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 208997,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 207515,
+  "stop_reason": "end_turn",
+  "session_id": "969c6745-4ab4-4a98-954d-ccc19ed413d4",
+  "total_cost_usd": 0.9410012000000001,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 39869,
+    "cache_read_input_tokens": 244526,
+    "output_tokens": 15229,
+    "output_tokens_details": {
+      "thinking_tokens": 10972
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 31181,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 7522,
+        "cache_read_input_tokens": 43005,
+        "cache_creation_input_tokens": 227,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 227
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 52143,
+        "output_tokens": 4300,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 5536,
+        "cache_read_input_tokens": 43232,
+        "cache_creation_input_tokens": 8688,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 8688,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 52157,
+      "outputTokens": 19529,
+      "cacheReadInputTokens": 244526,
+      "cacheCreationInputTokens": 39869,
+      "webSearchRequests": 0,
+      "costUSD": 0.9410012000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 10972,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01XHpttM4srWPG6UYpXbvfuf",
+      "tool_input": {
+        "command": "node --version && node --test --experimental-test-coverage test/ 2>&1 | tail -50",
+        "description": "Run tests with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01ANarQ5wyfHT6e19BqQXcgY",
+      "tool_input": {
+        "command": "node --test --experimental-test-coverage /private<tmp>/skim-eval-skim-test-gaps-OzLTj6/reminder-service/test/ 2>&1 | tail -50",
+        "description": "Run tests with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_015FLAnajATVojVyGCLjVUuL",
+      "tool_input": {
+        "command": "node --test --experimental-test-coverage /private<tmp>/skim-eval-skim-test-gaps-OzLTj6/reminder-service/test/",
+        "description": "Run tests with coverage report"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 18,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**5 gaps matter; the worst hides a live timezone bug.** I found these by reading the code. I could not run the tests because Bash approval was denied.\n\n- ⛔ **Timezones:** no test uses a nonzero offset; IST fires 5.5h early (`scheduler.js:9`)\n- ⛔ **Search:** no tests; \"milk and eggs\" throws, and SQL is built from strings (`api.js:31`)\n- ⚠ **Bad `at`:** no validation test; a NaN time returns 201 and never fires (`api.js:13`)\n- ⚠ **tick():** no tests; ticks can overlap and send twice, but not yet (`scheduler.js:26`)\n- ⚠ **Shipped format:** config uses `legacy`, but only `format` is tested (`config.json:3`)\n\n───\n\n**1. Timezones** (`scheduler.js:9`)\n\nThe only fixture sets `due_ms` by hand with `tz_offset_min: 0`, so subtracting the offset changes nothing. But `due_ms` is already UTC (`api.js:16`, README), and the scheduler subtracts the offset a second time. So a 09:00 IST (330) reminder fires at 03:30 local, 5.5h early. US Eastern (−300) fires 5h late. Every non-UTC user is affected.\n\nThe comment at `scheduler.js:7` is wrong and contradicts the README. Don't change the test to match it.\n\nTest: build the reminder through `create`, not by hand.\n```js\nconst { body } = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 });\nassert.equal(dueReminders([body], Date.parse('2026-03-01T03:29:00Z')).length, 0);\nassert.equal(dueReminders([body], Date.parse('2026-03-01T03:30:00Z')).length, 1);\n```\nFix: `r.due_ms <= nowMs`.\n\n**2. Search** (`api.js:29`)\n\nNo test calls `/reminders/search`.\n\nWhat breaks today:\n- The fake DB splits WHERE on `AND`, ignoring case (`db.js:29`). So \"milk and eggs\" leaves a condition with no closing quote. `matcher` throws `unsupported condition`, and `handle` doesn't catch it.\n- If `q` is missing, it searches for the literal text \"undefined\".\n- A `%` typed by the user works as a wildcard.\n\nAfter the DB swap: the README says the service must survive restarts, so a real DB is likely. Then this becomes SQL injection. `q = \"%' OR user_id LIKE '%\"` would return every user's reminders.\n\nTests: a term with \"and\", a term with `'`, a missing `q`, and a check that other users' rows never come back.\nFix: `query('... WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q}%`])`. Parameters skip the AND split, so this also fixes the crash.\n\n**3. Bad `at`** (`api.js:13`)\n\nThe only test is for a missing field. `toUtcMs` appends `:00Z`, so an `at` that includes seconds (`2026-03-01T09:00:00`) or any non-ISO string gives `NaN`. `NaN <= nowMs` is always false. The API returns 201 and the reminder never fires. `tzOffsetMin: \"+05:30\"` does the same.\n\nTest: a POST with seconds in `at` should get 400.\nFix: reject when `Number.isNaN(dueMs)`, and require an integer offset from −720 to 840.\n\n**4. tick()** (`scheduler.js:12`)\n\n`tick` and `startScheduler` have no tests. Nothing checks that a sent reminder gets `sent = 1`, that a failed one stays unsent, or that ticks don't overlap.\n\nThis can't happen today, because delivery is `console.log`. Once delivery is a network call:\n- Each failing send takes about 3s: 5 attempts with 200+400+800+1600 ms of backoff.\n- About 10 failures push a tick past 30s. `setInterval` then starts the next tick anyway.\n- The new tick picks up rows the old one hasn't marked yet, so both send them.\n- A reminder that always fails is retried on every tick forever. There's no attempt cap and no dead-letter, and it delays every reminder behind it.\n\nTests:\n- `tick(now, { out })` sends once and sets `sent = 1`.\n- A throwing `out` leaves the reminder unsent. `tick` hardcodes `{ attempts: 5 }`, so let it accept retry options or this test waits about 3s.\n- `Promise.all([tick(), tick()])` sends each reminder once. This should fail now: both ticks select before either one marks the row.\n\nFix: skip a tick while one is still running, or schedule the next tick with `setTimeout` after the current one ends.\n\n**5. Shipped format** (`config.json:3`)\n\nThe README calls `format.js` \"current\" and `legacy.js` \"old\". The test covers only `format`. Both config and `notify.js:14` default to `legacy`, so the format that actually ships has no test.\n- `legacy` joins fields with `|` and doesn't escape them. A reminder text containing `|` makes the line ambiguous for whatever parses it.\n- A typo in the config's formatter name makes every send fail. Those sends retry forever, and the only signal is a log line.\n\nTests: a fixed expected output for `legacy`, text containing `|`, and an unknown formatter name.\n\n**Lower priority**\n\n| Gap | Where | Risk |\n|---|---|---|\n| Jitter never exercised (`Math.random` pinned to 0.5) | `retry.js:8` | Delay can go negative or exceed `maxDelayMs` by 500 ms |\n| `list` called with no `query` | `api.js:25` | Throws TypeError; a missing `userId` returns `[]` |\n| `delete` has no ownership check | `api.js:37` | Anyone can delete any id; no test checks other rows survive |\n| `index.js` config wiring | `index.js:6` | Untested; low risk |\n| Persistence | `db.js:4` | README requires surviving restarts; not built, not tested |",
+  "ttft_ms": 4744,
+  "type": "result",
+  "duration_ms": 207628,
+  "uuid": "5ae46b69-c620-459a-a23a-7356033ca365",
+  "ttft_stream_ms": 4498,
+  "time_to_request_ms": 30,
+  "first_content_frame_ms": 4498,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

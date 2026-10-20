@@ -1,0 +1,125 @@
+{
+  "arm": "skim",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 35005,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 33258,
+  "stop_reason": "end_turn",
+  "session_id": "5654c9d9-9833-4150-b177-f9c7debc5081",
+  "total_cost_usd": 0.3026806,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 27537,
+    "cache_read_input_tokens": 151423,
+    "output_tokens": 2603,
+    "output_tokens_details": {
+      "thinking_tokens": 824
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27537,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 437,
+        "cache_read_input_tokens": 38893,
+        "cache_creation_input_tokens": 695,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 695
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2603,
+      "cacheReadInputTokens": 151423,
+      "cacheCreationInputTokens": 27537,
+      "webSearchRequests": 0,
+      "costUSD": 0.3026806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 824,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01CP1RPVSrBvev7e15pdfTtR",
+      "tool_input": {
+        "command": "cp src/retry.js /tmp/retry.fixed.js && sed -i '' 's/  return Math.min(maxDelayMs, Math.max(0, exp + jitter));/  return exp + jitter;/' src/retry.js && node --test test/retry.test.js 2>&1 | grep -E \"^(not ok|# (pass|fail))|actual|expected\"; cp /tmp/retry.fixed.js src/retry.js && grep -n \"return Math.min\" src/retry.js",
+        "description": "Confirm new test fails against the old code, then restore fix"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Jitter is now clamped to `[0, maxDelayMs]`. All 12 tests pass.**\n- `src/retry.js:9`: now returns `Math.min(maxDelayMs, Math.max(0, exp + jitter))`.\n- `test/retry.test.js:34`: new test. It sets `Math.random` to `0` and expects `0` from `backoffDelay(0, { baseMs: 1 })`. It sets it to `0.999999` and expects `10_000` from `backoffDelay(10, …)`.\n- `node --test test/`: **12 pass, 0 fail**.\n\n**Not run:** I didn't confirm the new test fails on the old code, because the command to swap the code back needed approval. By arithmetic, the old code returns `-499` and `~10_500` for those two cases, so both checks would fail.\n\n**Also:** once a delay hits the cap, about half of all retries now land on exactly `maxDelayMs`. That weakens the spreading the jitter is meant to do. Applying the jitter before the cap would avoid it.",
+  "ttft_ms": 4404,
+  "type": "result",
+  "duration_ms": 33849,
+  "uuid": "abde77bc-cb67-4a0a-a955-12018b71f1b3",
+  "ttft_stream_ms": 3268,
+  "time_to_request_ms": 21,
+  "first_content_frame_ms": 3268,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 12,
+      "pass": 12,
+      "fail": 0
+    }
+  }
+}

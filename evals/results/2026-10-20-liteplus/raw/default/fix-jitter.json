@@ -1,0 +1,116 @@
+{
+  "arm": "default",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 31392,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 29595,
+  "stop_reason": "end_turn",
+  "session_id": "ee7adc08-0351-4be0-bac3-6c4e61d2d0d3",
+  "total_cost_usd": 0.2822844,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 26579,
+    "cache_read_input_tokens": 145162,
+    "output_tokens": 2029,
+    "output_tokens_details": {
+      "thinking_tokens": 298
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26579,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 460,
+        "cache_read_input_tokens": 37022,
+        "cache_creation_input_tokens": 1599,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1599
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2029,
+      "cacheReadInputTokens": 145162,
+      "cacheCreationInputTokens": 26579,
+      "webSearchRequests": 0,
+      "costUSD": 0.2822844,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 298,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed the jitter in `src/retry.js` so the delay now always stays between 0 and `maxDelayMs`. I added a test, and `node --test test/` passes all 12 tests.\n\n**The bug:** `backoffDelay` adds up to ±500ms of random jitter after capping the delay at `maxDelayMs`. Two things went wrong:\n- With a small `baseMs`, the delay could go negative (e.g. `baseMs: 1` gave about -499ms).\n- Once the delay hit the cap, jitter could push it up to 500ms past `maxDelayMs`.\n\n**The fix** (`src/retry.js:10`): the delay is now clamped after the jitter is added:\n```js\nreturn Math.min(maxDelayMs, Math.max(0, exp + jitter));\n```\n\n**The test** (`test/retry.test.js:34`): it fakes the random number to get the largest jitter each way. It checks that a tiny delay with the most negative jitter returns exactly `0`, and a capped delay with the most positive jitter returns exactly `10_000`. The file's existing `afterEach` puts the real `Math.random` back afterwards.\n\nOne side effect: when the delay is at the cap, jitter can now only lower it. Retries that hit the cap will spread out below `maxDelayMs` instead of around it.",
+  "ttft_ms": 2511,
+  "type": "result",
+  "duration_ms": 30175,
+  "uuid": "6b25f7b1-41d8-47f6-9fca-56d8fe8d497e",
+  "ttft_stream_ms": 2254,
+  "time_to_request_ms": 420,
+  "first_content_frame_ms": 2254,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 12,
+      "pass": 12,
+      "fail": 0
+    }
+  }
+}

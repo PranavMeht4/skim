@@ -1,0 +1,46 @@
+diff -ruN <repo>/evals/fixture/src/retry.js <tmp>/skim-eval-skim-fix-jitter-gT3L3x/reminder-service/src/retry.js
+--- <repo>/evals/fixture/src/retry.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-jitter-gT3L3x/reminder-service/src/retry.js	2026-10-20 17:29:03
+@@ -6,7 +6,8 @@
+ export function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {
+   const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);
+   const jitter = (Math.random() - 0.5) * JITTER_MS;
+-  return exp + jitter;
++  // Clamp after jitter so the delay stays within [0, maxDelayMs].
++  return Math.min(maxDelayMs, Math.max(0, exp + jitter));
+ }
+ 
+ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+diff -ruN <repo>/evals/fixture/test/retry.test.js <tmp>/skim-eval-skim-fix-jitter-gT3L3x/reminder-service/test/retry.test.js
+--- <repo>/evals/fixture/test/retry.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-jitter-gT3L3x/reminder-service/test/retry.test.js	2026-10-20 17:28:57
+@@ -1,6 +1,6 @@
+ import { test, beforeEach, afterEach } from 'node:test';
+ import assert from 'node:assert/strict';
+-import { withRetry } from '../src/retry.js';
++import { withRetry, backoffDelay } from '../src/retry.js';
+ 
+ let realRandom;
+ beforeEach(() => { realRandom = Math.random; Math.random = () => 0.5; }); // no jitter
+@@ -29,4 +29,21 @@
+     withRetry(async () => { throw new Error(`fail ${++calls}`); }, { attempts: 2, baseMs: 1 }),
+     /fail 2/,
+   );
++});
++
++test('jitter never pushes the delay below 0', () => {
++  Math.random = () => 0; // most negative jitter
++  assert.equal(backoffDelay(0, { baseMs: 200 }), 0);
++});
++
++test('jitter never pushes the delay above maxDelayMs', () => {
++  Math.random = () => 0.999999; // most positive jitter
++  assert.equal(backoffDelay(20, { baseMs: 200, maxDelayMs: 10_000 }), 10_000);
++});
++
++test('jitter still spreads delays that are inside the bounds', () => {
++  Math.random = () => 0.75;
++  assert.equal(backoffDelay(3, { baseMs: 200 }), 1600 + 250);
++  Math.random = () => 0.25;
++  assert.equal(backoffDelay(3, { baseMs: 200 }), 1600 - 250);
+ });

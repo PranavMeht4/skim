@@ -1,0 +1,116 @@
+{
+  "arm": "concise",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 60946,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 59612,
+  "stop_reason": "end_turn",
+  "session_id": "5444d6a6-bb73-4321-8b31-2f89d591ba7c",
+  "total_cost_usd": 0.3904866,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 29891,
+    "cache_read_input_tokens": 192253,
+    "output_tokens": 5643,
+    "output_tokens_details": {
+      "thinking_tokens": 3304
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 29891,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2225,
+        "cache_read_input_tokens": 41127,
+        "cache_creation_input_tokens": 815,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 815
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 5643,
+      "cacheReadInputTokens": 192253,
+      "cacheCreationInputTokens": 29891,
+      "webSearchRequests": 0,
+      "costUSD": 0.3904866,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3304,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WgxTKMmVESRvWszZ1wVwyD",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { handle } from './src/api.js';\nimport { dueReminders } from './src/scheduler.js';\nconst r = handle({ method:'POST', path:'/reminders', body:{ userId:'u1', text:'a', at:'2026-03-01T09:00', tzOffsetMin:330 }}).body;\nconsole.log('IST 09:00 due UTC', new Date(r.due_ms).toISOString(), 'fires at/after 22:00Z?', dueReminders([r], Date.parse('2026-02-28T22:00:00Z')).length);\nconst bad = handle({ method:'POST', path:'/reminders', body:{ userId:'u1', text:'b', at:'2026-03-01T09:00:00' }}).body;\nconsole.log('with seconds ->', bad.status ?? 201, bad.due_ms);\nhandle({ method:'POST', path:'/reminders', body:{ userId:'u2', text:'secret', at:'2026-03-01T09:00' }});\nconsole.log('search apostrophe:', handle({ method:'GET', path:'/reminders/search', query:{ userId:'u1', q:\\\"mum's\\\" }}).body);\ntry { handle({ method:'GET', path:'/reminders' }) } catch(e) { console.log('list w/o query:', e.message) }\nconsole.log('search no q:', handle({ method:'GET', path:'/reminders/search', query:{ userId:'u1' }}).body.length);\n\"",
+        "description": "Probe api.js behaviour against the in-memory db"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Two problems are serious: an SQL injection in search, and reminders firing at the wrong time for anyone outside UTC. I found these by reading the code. I tried a quick script to confirm them, but it was blocked waiting for approval.\n\n1. **SQL injection in `searchReminders`** (`src/api.js:31`). `userId` and `q` are pasted straight into the SQL. With a real database, `userId=' OR '1'='1` returns every user's reminders, and a normal search like `mum's` causes a syntax error. Pass them as parameters instead: `query('... WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q}%`])`. The in-memory db already supports `LIKE ?`.\n\n2. **Time zone offset applied twice.** `toUtcMs` (`src/api.js:8`) correctly stores `due_ms` as UTC, as the README says. But `dueReminders` (`src/scheduler.js:9`) subtracts `tz_offset_min` again. So an IST (+330) reminder fires 5.5h early, and a US Eastern (−300) reminder fires 5h late. Every test uses offset 0, so none of them catch it. The fix belongs in the scheduler: `r.due_ms <= nowMs`, and delete the outdated comment above it.\n\n3. **Bad `at` values are saved silently and never fire.** Nothing checks that `at` parses. A common ISO form with seconds, like `2026-03-01T09:00:00`, becomes `...09:00:00:00Z`, which parses as `NaN`. The API still returns 201, and `NaN <= now` is never true, so the reminder never sends. A non-numeric `tzOffsetMin` breaks it the same way. Return 400 when `!Number.isFinite(dueMs)`.\n\n4. **No ownership checks.** `deleteReminder` (`:35-38`) deletes any id without checking whose it is. List and search trust whatever `userId` the client sends. Unless something before `handle` authenticates the user, anyone can read or delete anyone's reminders. Even with auth upstream, delete should add `AND user_id = ?`.\n\n5. **Missing query parameters.** `GET /reminders` with no query string crashes with a TypeError, because `req.query` is undefined (`:25`, `:31`). Search with no `q` looks for the literal text `\"undefined\"`. Both should return 400.\n\nA smaller design issue: storing one fixed offset per reminder means a reminder set across a daylight-saving change fires an hour off. That only matters if you have US or EU users.",
+  "ttft_ms": 2514,
+  "type": "result",
+  "duration_ms": 59692,
+  "uuid": "c6e123db-11b4-4e23-a1e4-0477ad666056",
+  "ttft_stream_ms": 1584,
+  "time_to_request_ms": 27,
+  "first_content_frame_ms": 1584,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

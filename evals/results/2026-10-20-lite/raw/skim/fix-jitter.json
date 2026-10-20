@@ -1,0 +1,139 @@
+{
+  "arm": "skim",
+  "case": "fix-jitter",
+  "kind": "fix",
+  "prompt": "In src/retry.js the jitter can push the delay below 0 or above maxDelayMs. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 82123,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 80462,
+  "stop_reason": "end_turn",
+  "session_id": "c29d8f00-c0c9-440e-8fa7-7744aaaf9fe3",
+  "total_cost_usd": 0.566257,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 27570,
+    "cache_read_input_tokens": 261615,
+    "output_tokens": 3322,
+    "output_tokens_details": {
+      "thinking_tokens": 832
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26904,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 72,
+        "cache_read_input_tokens": 38238,
+        "cache_creation_input_tokens": 717,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 717
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 39897,
+        "output_tokens": 3464,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 609,
+        "cache_read_input_tokens": 38955,
+        "cache_creation_input_tokens": 666,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 666,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 39913,
+      "outputTokens": 6786,
+      "cacheReadInputTokens": 261615,
+      "cacheCreationInputTokens": 27570,
+      "webSearchRequests": 0,
+      "costUSD": 0.566257,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 832,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Fixed: `backoffDelay` now clamps the delay to `[0, maxDelayMs]`. `node --test test/` passes 12/12.**\n\n1. **Fix** (`src/retry.js:9`): `return Math.min(maxDelayMs, Math.max(0, exp + jitter));`\n2. **New test** (`test/retry.test.js:34`): it checks the lowest jitter (expects `0`), the highest jitter at the cap (expects `10_000`) and 3,000 random samples.\n3. **The test catches the bug:** before the fix it failed with `-499 !== 0`. After the fix it passes.\n\n**Also:** clamping makes delays **bunch up at the bounds**. With the defaults (`baseMs` 200, jitter ±500), about **30% of first retries** and **10% of second retries** now come out as **exactly 0 ms**. Retries that reach the cap would land exactly on `maxDelayMs` about half the time. `scheduler.js` only uses 5 attempts, so it **never reaches** the 10 s cap, and only the bunching at 0 affects it today. To keep the spread, the jitter window could be shrunk so it always stays inside the bounds. That would change the \"`Math.random = 0.5` means no jitter\" assumption the existing tests rely on, so I **didn't** make that change.",
+  "ttft_ms": 4261,
+  "type": "result",
+  "duration_ms": 81065,
+  "uuid": "e9d76f45-e857-4715-b94e-19a5942d6683",
+  "ttft_stream_ms": 4038,
+  "time_to_request_ms": 73,
+  "first_content_frame_ms": 4038,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 12,
+      "pass": 12,
+      "fail": 0
+    }
+  }
+}

@@ -1,0 +1,53 @@
+diff -ruN <repo>/evals/fixture/src/scheduler.js <tmp>/skim-eval-skim-fix-timezone-ksMp9T/reminder-service/src/scheduler.js
+--- <repo>/evals/fixture/src/scheduler.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-timezone-ksMp9T/reminder-service/src/scheduler.js	2026-10-20 15:33:34
+@@ -4,9 +4,10 @@
+ import { withRetry } from './retry.js';
+ 
+ // A reminder is due once its time has arrived and it has not been sent.
+-// due_ms is the user's wall-clock time, so shift it back to UTC with their offset.
++// due_ms is already a UTC epoch (api.js converts with the user's offset on create),
++// so compare it to now directly. Applying tz_offset_min again would shift it twice.
+ export function dueReminders(reminders, nowMs) {
+-  return reminders.filter((r) => !r.sent && r.due_ms - r.tz_offset_min * 60_000 <= nowMs);
++  return reminders.filter((r) => !r.sent && r.due_ms <= nowMs);
+ }
+ 
+ export async function tick(nowMs = Date.now(), opts = {}) {
+diff -ruN <repo>/evals/fixture/test/scheduler.test.js <tmp>/skim-eval-skim-fix-timezone-ksMp9T/reminder-service/test/scheduler.test.js
+--- <repo>/evals/fixture/test/scheduler.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-timezone-ksMp9T/reminder-service/test/scheduler.test.js	2026-10-20 15:33:20
+@@ -1,6 +1,8 @@
+ import { test } from 'node:test';
+ import assert from 'node:assert/strict';
+ import { dueReminders } from '../src/scheduler.js';
++import { handle } from '../src/api.js';
++import { query, reset } from '../src/db.js';
+ 
+ const at = (iso) => Date.parse(iso);
+ const reminder = (over) => ({ id: 1, sent: 0, tz_offset_min: 0, due_ms: at('2026-03-01T09:00:00Z'), ...over });
+@@ -14,4 +16,24 @@
+ test('a reminder that was already sent is not due again', () => {
+   const r = reminder({ sent: 1 });
+   assert.equal(dueReminders([r], at('2026-03-02T00:00:00Z')).length, 0);
++});
++
++// Regression: the scheduler used to apply tz_offset_min to due_ms a second time,
++// so IST users (330) got reminders 5.5h early and US users got them late.
++// Goes through the real create path so the api/scheduler contract is covered.
++const dueAfterCreate = (tzOffsetMin, nowIso) => {
++  reset();
++  handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin } });
++  return dueReminders(query('SELECT * FROM reminders WHERE sent = 0'), at(nowIso)).length;
++};
++
++test('09:00 IST (+330) fires at 03:30Z, not earlier', () => {
++  assert.equal(dueAfterCreate(330, '2026-02-28T22:00:00Z'), 0); // old bug fired here
++  assert.equal(dueAfterCreate(330, '2026-03-01T03:29:00Z'), 0);
++  assert.equal(dueAfterCreate(330, '2026-03-01T03:30:00Z'), 1);
++});
++
++test('09:00 EST (-300) fires at 14:00Z, not later', () => {
++  assert.equal(dueAfterCreate(-300, '2026-03-01T13:59:00Z'), 0);
++  assert.equal(dueAfterCreate(-300, '2026-03-01T14:00:00Z'), 1);
+ });

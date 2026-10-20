@@ -1,0 +1,107 @@
+{
+  "arm": "skim",
+  "case": "safe-delete-legacy",
+  "kind": "read",
+  "prompt": "Is it safe to delete src/legacy.js?",
+  "wall_ms": 24290,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 22730,
+  "stop_reason": "end_turn",
+  "session_id": "1bcb5e00-3643-47af-9d86-e9c02ce47218",
+  "total_cost_usd": 0.3009508,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 28472,
+    "cache_read_input_tokens": 151974,
+    "output_tokens": 2137,
+    "output_tokens_details": {
+      "thinking_tokens": 535
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28472,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 982,
+        "cache_read_input_tokens": 39091,
+        "cache_creation_input_tokens": 1432,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1432
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2137,
+      "cacheReadInputTokens": 151974,
+      "cacheCreationInputTokens": 28472,
+      "webSearchRequests": 0,
+      "costUSD": 0.3009508,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 535,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**No, it's in active use.** Production loads it by name, so a search for imports finds nothing.\n\n- `config.json:3` sets `\"formatter\": \"legacy\"`. `src/index.js:6` passes it to the scheduler, then on to `send()`.\n- `src/notify.js:8` loads the formatter with `` import(`./${name}.js`) ``. That turns `\"legacy\"` into `./legacy.js`.\n- `src/notify.js:14` also defaults to `formatter = 'legacy'`.\n\n**If you delete it:** every send fails with a missing-module error. `withRetry` tries 5 times, then logs `reminder N failed`. The reminder stays unsent and fails again on every tick, so **no reminders are delivered**.\n\n**Tests won't catch it.** `test/notify.test.js:8` uses `formatter: 'format'`, and no test uses `legacy`. I didn't run the suite.\n\n**To remove it safely:**\n1. Set `config.json:3` to `\"format\"`.\n2. Change the default at `src/notify.js:14` to `'format'`.\n3. Delete `src/legacy.js` and its line at `README.md:28`.\n\n⚠ **Risk:** The TODO in `legacy.js:2` says \"once everyone is on the new format\". That suggests something outside this repo reads the `REMIND|user|at|text` pipe format. I can't check that from here. Steps 1–2 change what that reader receives, so confirm with its owners first.",
+  "ttft_ms": 1878,
+  "type": "result",
+  "duration_ms": 22939,
+  "uuid": "e396ebd9-06f7-458c-9216-19b28ad5c3c4",
+  "ttft_stream_ms": 1196,
+  "time_to_request_ms": 164,
+  "first_content_frame_ms": 1197,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,133 @@
+{
+  "arm": "skim",
+  "case": "fix-timezone",
+  "kind": "fix",
+  "prompt": "Users east of UTC (for example India, UTC+5:30) report that reminders fire hours early. Find the cause and fix it. Add a regression test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 72038,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 68125,
+  "stop_reason": "end_turn",
+  "session_id": "9eb58534-b864-4629-8020-e892b5be4ed3",
+  "total_cost_usd": 0.44958679999999995,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 33223,
+    "cache_read_input_tokens": 406974,
+    "output_tokens": 5116,
+    "output_tokens_details": {
+      "thinking_tokens": 756
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 33223,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 831,
+        "cache_read_input_tokens": 44365,
+        "cache_creation_input_tokens": 909,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 909
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 5116,
+      "cacheReadInputTokens": 406974,
+      "cacheCreationInputTokens": 33223,
+      "webSearchRequests": 0,
+      "costUSD": 0.44958679999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 756,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Gy6wEegXshpDGFbjBqCXtF",
+      "tool_input": {
+        "command": "for f in README.md config.json src/*.js test/*.js; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Print all source, test, and config files"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01FMQHrWxy8kKFqSj8Wx2Gjn",
+      "tool_input": {
+        "command": "cp src/scheduler.js /tmp/scheduler.fixed.js && sed -i '' 's/r.due_ms <= nowMs/r.due_ms - r.tz_offset_min * 60_000 <= nowMs/' src/scheduler.js && grep -n 'filter' src/scheduler.js && node --test test/scheduler.test.js 2>&1 | grep -E '^(not ok|ok|# (pass|fail))|expected|actual' ; cp /tmp/scheduler.fixed.js src/scheduler.js && echo '--- restored fix ---' && grep -n 'filter' src/scheduler.js && node --test test/ 2>&1 | grep -E '^(not ok|ok)|^# (tests|pass|fail)'",
+        "description": "Run new test against old code, restore fix, run full suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 18,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Timezone bug fixed. 12/12 tests pass.**\n- **Cause:** the offset was applied twice. `api.js` stores `due_ms` as UTC, then the scheduler subtracted the offset again (`src/scheduler.js:9`)\n- **Effect:** IST reminders fired **5h30m early**. Users west of UTC got theirs late by the same amount (New York: 5h late)\n- **Fix:** the scheduler now compares `r.due_ms <= nowMs` directly\n- **Proof:** the new IST/New York test fails on the old code and passes on the fix\n- **Also:** `searchReminders` builds SQL by joining strings, so it is open to SQL injection. I did not change it (`src/api.js:31`)\n\n───\n\n```\nsrc/scheduler.js        +2 −2   compare due_ms directly; fix comment\ntest/scheduler.test.js +13      IST (+330) and New York (−300) test\n```\n\n**Trace for 09:00 IST** (`tzOffsetMin: 330`):\n\n```\napi.js toUtcMs     09:00 local − 5:30  →  03:30Z stored in due_ms   (correct)\nscheduler (old)    03:30Z − 5:30       →  22:00Z the previous day   (fires 5.5h early)\nscheduler (new)    03:30Z              →  fires at 03:30Z           (correct)\n```\n\n**How the test was checked.** I put the old line back and ran the new test. It failed:\n\n```\nnot ok 2 - a reminder fires at the local time the user picked, not offset again\n  expected: 0\n  actual: 1\n  (scheduler.test.js:18)\n```\n\nWith the fix back in place, `node --test test/` passes 12 of 12. That is the 11 old tests plus the new one.\n\n**No data migration needed.** The stored `due_ms` values were always correct. Only the comparison in the scheduler was wrong.",
+  "ttft_ms": 4044,
+  "type": "result",
+  "duration_ms": 69066,
+  "uuid": "eef37ec4-d72e-4a14-8e28-7fc19358da9c",
+  "ttft_stream_ms": 3599,
+  "time_to_request_ms": 47,
+  "first_content_frame_ms": 3600,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 12,
+      "pass": 12,
+      "fail": 0
+    }
+  }
+}

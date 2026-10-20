@@ -1,0 +1,132 @@
+{
+  "arm": "skim",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 217707,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 216382,
+  "stop_reason": "end_turn",
+  "session_id": "a9e5e773-b9db-487a-aaa4-0e03dc03967c",
+  "total_cost_usd": 1.0200198,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 42227,
+    "cache_read_input_tokens": 385869,
+    "output_tokens": 13410,
+    "output_tokens_details": {
+      "thinking_tokens": 7626
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 38985,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 3526,
+        "cache_read_input_tokens": 47398,
+        "cache_creation_input_tokens": 3638,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3638
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 47664,
+      "outputTokens": 21205,
+      "cacheReadInputTokens": 385869,
+      "cacheCreationInputTokens": 42227,
+      "webSearchRequests": 0,
+      "costUSD": 1.0200198,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 7626,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_011RpSdzssGNATus9mKWZdJd",
+      "tool_input": {
+        "command": "mkdir -p /tmp/api-probe && cat > /tmp/api-probe/probe.mjs <<'EOF'\nconst root = process.argv[2];\nconst { handle } = await import(`${root}/src/api.js`);\nconst { reset, queryLog } = await import(`${root}/src/db.js`);\nconst { dueReminders } = await import(`${root}/src/scheduler.js`);\nconst create = (body) => handle({ method: 'POST', path: '/reminders', body });\n\n// 1. double offset: IST user, 09:00 local = 03:30Z\nreset();\nconst ist = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconst fires = [];\nfor (let t = Date.parse('2026-02-28T18:00:00Z'); t <= Date.parse('2026-03-01T12:00:00Z'); t += 60_000) {\n  if (dueReminders([ist], t).length) { fires.push(new Date(t).toISOString()); break; }\n}\nconsole.log('IST 09:00 (=03:30Z) first due at', fires[0]);\nconst ny = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: -300 }).body;\nfor (let t = Date.parse('2026-03-01T00:00:00Z'); ; t += 60_000) {\n  if (dueReminders([ny], t).length) { console.log('NY 09:00 (=14:00Z) first due at', new Date(t).toISOString()); break; }\n}\n\n// 2. search with \" and \" in the term\nreset();\ncreate({ userId: 'u1', text: 'buy bread and butter', at: '2026-03-01T09:00' });\ntry { console.log('search \"bread and butter\":', handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1', q: 'bread and butter' } })); }\ncatch (e) { console.log('search \"bread and butter\" THREW:', e.message); }\ntry { console.log('search no q:', JSON.stringify(handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1' } }))); }\ncatch (e) { console.log('search no q THREW:', e.message); }\nconsole.log('last sql:', queryLog.at(-1).sql);\n\n// 3. bad `at` formats\nreset();\nfor (const at of ['2026-03-01T09:00:00', '2026-03-01 09:00', 'tomorrow', '2026-03-01T09:00Z']) {\n  const r = create({ userId: 'u1', text: 'x', at });\n  console.log(JSON.stringify(at), '->', r.status, 'due_ms', r.body.due_ms);\n}\n\n// 4. delete another user's reminder\nreset();\nconst other = create({ userId: 'victim', text: 'secret', at: '2026-03-01T09:00' }).body;\nconsole.log('delete victim reminder w/o any user:', handle({ method: 'DELETE', path: `/reminders/${other.id}` }).status);\n\n// 5. missing query object\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('GET /reminders no query THREW:', e.message); }\nEOF\nnode /tmp/api-probe/probe.mjs \"$PWD\"",
+        "description": "Run probe script against api.js behaviors"
+      }
+    },
+    {
+      "tool_name": "Write",
+      "tool_use_id": "toolu_019w4T93fnWb2XRVrCmszybc",
+      "tool_input": {
+        "file_path": "/tmp/api-probe/probe.mjs",
+        "content": "const root = process.argv[2];\nconst { handle } = await import(`${root}/src/api.js`);\nconst { reset, queryLog } = await import(`${root}/src/db.js`);\nconst { dueReminders } = await import(`${root}/src/scheduler.js`);\nconst create = (body) => handle({ method: 'POST', path: '/reminders', body });\n\nconst firstDue = (r, fromIso) => {\n  for (let t = Date.parse(fromIso); t < Date.parse(fromIso) + 2 * 86400_000; t += 60_000) {\n    if (dueReminders([r], t).length) return new Date(t).toISOString();\n  }\n};\n\n// 1. double offset\nreset();\nconst ist = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconsole.log('IST 09:00 (should be 03:30Z) first due at', firstDue(ist, '2026-02-28T12:00:00Z'));\nconst ny = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: -300 }).body;\nconsole.log('NY 09:00 (should be 14:00Z) first due at', firstDue(ny, '2026-02-28T12:00:00Z'));\n\n// 2. search with \" and \" in the term, and with no q\nreset();\ncreate({ userId: 'u1', text: 'buy bread and butter', at: '2026-03-01T09:00' });\ntry {\n  console.log('search \"bread and butter\":', handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1', q: 'bread and butter' } }));\n} catch (e) { console.log('search \"bread and butter\" THREW:', e.message); }\ntry {\n  console.log('search no q:', JSON.stringify(handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1' } })));\n} catch (e) { console.log('search no q THREW:', e.message); }\nconsole.log('last sql:', queryLog.at(-1).sql);\n\n// 3. bad `at` formats\nreset();\nfor (const at of ['2026-03-01T09:00:00', '2026-03-01 09:00', 'tomorrow', '2026-03-01T09:00Z']) {\n  const r = create({ userId: 'u1', text: 'x', at });\n  console.log(JSON.stringify(at), '->', r.status, 'due_ms', r.body.due_ms);\n}\n\n// 4. delete another user's reminder\nreset();\nconst other = create({ userId: 'victim', text: 'secret', at: '2026-03-01T09:00' }).body;\nconsole.log('delete victim reminder, no user given:', handle({ method: 'DELETE', path: `/reminders/${other.id}` }).status);\n\n// 5. missing query object\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('GET /reminders no query THREW:', e.message); }\n"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01HvK4VxyZhY9BsSzrUHXFuQ",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nconst root = process.cwd();\nconst { handle } = await import(root + '/src/api.js');\nconst { reset, queryLog } = await import(root + '/src/db.js');\nconst { dueReminders } = await import(root + '/src/scheduler.js');\nconst create = (body) => handle({ method: 'POST', path: '/reminders', body });\nconst firstDue = (r, fromIso) => { for (let t = Date.parse(fromIso); t < Date.parse(fromIso) + 2*86400000; t += 60000) if (dueReminders([r], t).length) return new Date(t).toISOString(); };\nreset();\nconst ist = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 }).body;\nconsole.log('IST 09:00 (should be 03:30Z) first due at', firstDue(ist, '2026-02-28T12:00:00Z'));\nconst ny = create({ userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: -300 }).body;\nconsole.log('NY 09:00 (should be 14:00Z) first due at', firstDue(ny, '2026-02-28T12:00:00Z'));\nreset();\ncreate({ userId: 'u1', text: 'buy bread and butter', at: '2026-03-01T09:00' });\ntry { console.log('search bread and butter:', JSON.stringify(handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1', q: 'bread and butter' } }))); } catch (e) { console.log('search bread and butter THREW:', e.message); }\ntry { console.log('search no q:', JSON.stringify(handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1' } }))); } catch (e) { console.log('search no q THREW:', e.message); }\nconsole.log('last sql:', queryLog.at(-1).sql);\nreset();\nfor (const at of ['2026-03-01T09:00:00', '2026-03-01 09:00', 'tomorrow', '2026-03-01T09:00Z']) { const r = create({ userId: 'u1', text: 'x', at }); console.log(JSON.stringify(at), '->', r.status, 'due_ms', r.body.due_ms); }\nreset();\nconst other = create({ userId: 'victim', text: 'secret', at: '2026-03-01T09:00' }).body;\nconsole.log('delete victim reminder, no user given:', handle({ method: 'DELETE', path: '/reminders/' + other.id }).status);\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('GET /reminders no query THREW:', e.message); }\n\"",
+        "description": "Probe api.js bugs with inline Node script"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**5 problems in `api.js`**; the worst bug is in `scheduler.js` (see Also).\n1. **SQL injection** in search: `userId` and `q` are pasted straight into the SQL (`api.js:31`). Searching \"bread and butter\" already crashes.\n2. **No caller identity:** every route trusts a `userId` the client sends. DELETE matches on `id` alone, so anyone can delete any reminder (`api.js:37`).\n3. **A bad `at` is accepted silently:** `at: 'tomorrow'` stores `due_ms: NaN` and returns 201, and the reminder never fires (`api.js:13-16`).\n4. **Crashes instead of 4xx:** a missing `req.query` throws a TypeError (`api.js:25`, `:31`). `handle` has no try/catch.\n5. **DST drift:** one fixed `tzOffsetMin` is wrong for reminders that cross a DST change. This is a design issue and the lowest priority.\n\n**Also:**\n- **Reminders fire at the wrong time for every non-UTC user.** `api.js` already stores `due_ms` as UTC, and `scheduler.js:9` subtracts the offset a second time. IST reminders fire **5.5h early** and New York ones **5h late**. Fix: `r.due_ms <= nowMs`. The tests miss it because `scheduler.test.js:6` hardcodes `tz_offset_min: 0`.\n- **`handle` isn't wired up:** `index.js` only starts the scheduler, and only the tests call `handle`.\n\n**Not run:** permissions blocked my probe scripts. Every finding comes from reading and tracing the code, not from running it.\n\n**1. SQL injection (`api.js:29-33`).** On a real SQL database, `userId=' OR '1'='1` returns every user's reminders. The in-memory stand-in breaks ordinary searches too:\n- `db.js:29` splits the WHERE clause on ` AND `.\n- So \"bread and butter\" leaves the fragment `text LIKE '%bread`.\n- `db.js:18` then throws `unsupported condition: text LIKE '%bread`. I traced this; I didn't run it.\n- A missing `q` searches for the literal text \"undefined\".\n\nThis fix works with today's `db.js`, because `db.js:17` accepts `LIKE ?`:\n```js\nquery('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [q.userId, `%${q.q ?? ''}%`])\n```\n\n**2. No caller identity (`api.js:24-38`).** The request shape `{ method, path, query, body }` carries no session or user. So list and search show any user's reminders to whoever names that `userId`. DELETE doesn't ask for a user at all. Fix:\n- take the user from auth, not from the query or body\n- delete with `WHERE id = ? AND user_id = ?` (`db.js` supports this)\n\n**3. No input validation (`api.js:13-16`).** The code only checks that fields are present.\n- `'tomorrow'` becomes `Date.parse('tomorrow:00Z')`, which is NaN.\n- `NaN <= now` is always false, so the reminder never fires, but the user got a 201.\n- The 201 response shows `due_ms: null`, because JSON turns NaN into null.\n\nFix, returning 400 on any failure:\n- `at` must match `/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/` (the README's format)\n- `Number.isFinite(dueMs)` must be true\n- `tzOffsetMin` must be an integer in [-720, 840]\n\n**4. Crashes.** `listReminders` and `searchReminders` read `req.query` with no default. Any error from the database also escapes `handle`, so the caller crashes instead of getting a 500.\n\n**5. DST.** Say a New York user sets a July 09:00 reminder in January. The client sends offset -300, so the reminder fires at 10:00 EDT. Fix: store an IANA zone such as `America/New_York` and work out the offset for the target date with `Intl`. Node 20 has this built in, so it needs no new packages.",
+  "ttft_ms": 2521,
+  "type": "result",
+  "duration_ms": 216493,
+  "uuid": "1eb1015c-e0a5-414c-8fdd-64d4da03e995",
+  "ttft_stream_ms": 2355,
+  "time_to_request_ms": 29,
+  "first_content_frame_ms": 2356,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,3 @@
+The service tries each reminder **5 times** per tick. That number is hardcoded at `src/scheduler.js:16` as `withRetry(() => send(r, opts), { attempts: 5 })`. The default in `withRetry` is 3 (`src/retry.js:14`), but the scheduler overrides it, and `config.json` has no setting for it.
+
+Between attempts it waits with exponential backoff and jitter: it starts at 200ms, doubles each time, and never waits more than 10s (`src/retry.js:6`). If all 5 attempts fail, the reminder is still marked unsent, so the next tick (every 30s) runs another 5 attempts. The service never stops trying a reminder for good.

@@ -1,0 +1,163 @@
+{
+  "arm": "skim",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 229102,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 226033,
+  "stop_reason": "end_turn",
+  "session_id": "4200bc1c-9a6b-4cda-a2e8-f15487d0a56c",
+  "total_cost_usd": 0.9567311999999999,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 38356,
+    "cache_read_input_tokens": 331416,
+    "output_tokens": 12022,
+    "output_tokens_details": {
+      "thinking_tokens": 7805
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34440,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2999,
+        "cache_read_input_tokens": 46243,
+        "cache_creation_input_tokens": 248,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 248
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 47594,
+        "output_tokens": 8223,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 3134,
+        "cache_read_input_tokens": 46491,
+        "cache_creation_input_tokens": 3916,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 3916,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 47612,
+      "outputTokens": 20245,
+      "cacheReadInputTokens": 331416,
+      "cacheCreationInputTokens": 38356,
+      "webSearchRequests": 0,
+      "costUSD": 0.9567311999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 7805,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01GdB4ezPAqsyUDMi58cCMEx",
+      "tool_input": {
+        "command": "find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' | head -100 && echo && wc -l $(find . -type f -not -path '*/node_modules/*' -not -path '*/.git/*' \\( -name '*.py' -o -name '*.ts' -o -name '*.js' -o -name '*.go' -o -name '*.json' -o -name '*.toml' -o -name '*.md' \\))",
+        "description": "List project files and line counts"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01A6QXMVhbK57vrvr8HFhRdh",
+      "tool_input": {
+        "command": "node --version && node --test --experimental-test-coverage test/ 2>&1 | tail -40",
+        "description": "Run test suite with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01TeQGNnMPJ1BiQyGzC7dtT7",
+      "tool_input": {
+        "command": "node --test --experimental-test-coverage <tmp>/skim-eval-skim-test-gaps-sL08o7/reminder-service/test/",
+        "description": "Run test suite with coverage report"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WzNN5xqHWwKRQqTRAihPDY",
+      "tool_input": {
+        "command": "npm test --prefix <tmp>/skim-eval-skim-test-gaps-sL08o7/reminder-service",
+        "description": "Run the project's test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 21,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**The biggest gap: no test uses a non-zero timezone, and that hides a live bug where every non-UTC reminder fires at the wrong time.** I only read the code. `node --test` and `npm test` both needed approval, so no tests ran and I have no coverage numbers.\n\n1. **Timezone is shifted twice and never tested.** `api.js:8` already converts to UTC, then `scheduler.js:9` subtracts the offset again. IST reminders fire **5.5h early** and US Eastern ones **5h late**. Every test uses offset 0 (`scheduler.test.js:6`, `api.test.js:17`).\n2. **`tick()` and `startScheduler` have zero tests.** `setInterval` doesn't wait for a tick to finish, and `tick` never re-checks `sent`. So any tick over 30s **sends the same reminders twice** (`scheduler.js:26`).\n3. **Search has zero tests and builds SQL by string concatenation** (`api.js:31`). Today a search for \"bread and milk\" throws `unsupported condition: text LIKE '%bread`. Against a real database it's **SQL injection**.\n4. **The format that actually ships is untested.** `config.json:3` and `notify.js:14` use `legacy`, but the only test of `send` uses `format` (`notify.test.js:8`). Deleting `legacy.js`, as its TODO suggests, would make **every send fail** with no test catching it.\n5. **An invalid `at` is accepted** (`api.js:13`). `at: \"9am\"` returns 201 with `due_ms` = NaN, and the reminder **never fires, with no error**.\n6. **`db.js` has no tests of its own**, yet the README requires surviving restarts (`README.md:16`), so it has to be swapped out. That swap has no safety net.\n\n## Tests to add, in priority order\n\n| # | Test | Fix it exposes |\n|---|---|---|\n| 1 | Create at `09:00` with offset 330, then `dueReminders` is due at `03:30Z` and not at `03:29Z` | `r.due_ms <= nowMs` in `scheduler.js:9` |\n| 2 | Two concurrent `tick()` calls send each reminder once; a failed send stays unsent; a successful one is marked sent | Guard against overlapping ticks, or re-check `sent` before sending |\n| 3 | Search terms containing `'` and ` and ` | Use `?` parameters, like `listReminders` does |\n| 4 | `send` with `legacy`, and with an unknown formatter name | Test the formatter that's actually configured |\n| 5 | `at: \"9am\"` returns 400 | Reject when `Number.isNaN(dueMs)` |\n| 6 | A set of `db.js` tests (insert, select, LIKE, update, delete) that the new store must also pass | Lets you switch to a file-backed store safely |\n\n## Why this order\n- **#1 and #2 are on the live path.** `index.js` only starts the scheduler. Nothing in `src/` calls `handle()`, so how much #3 and #5 matter depends on whatever outside caller uses the API.\n- **#1 is certain:** the scheduler's comment says `due_ms` is wall-clock time, but the README says it's UTC. The tests for each half pass on their own because both use offset 0.\n- **#2 is a risk, not a live bug yet.** `send` is just `console.log` today. But `tick` works on copied rows (`db.js:51`), so a backlog after downtime or slow real delivery would send duplicates. Each failing reminder also spends about 3s retrying (5 attempts: 200+400+800+1600ms), so 10 failures already exceed the 30s tick.\n- **#3 becomes injection with the persistence work.** Against today's in-memory stand-in it only crashes, because it can only AND conditions together.\n\n**Also:**\n- **The random jitter in retries is never tested.** The retry tests fix `Math.random` at 0.5 (`retry.test.js:6`). The ±500ms jitter is bigger than the 200ms base delay, so early delays can come out negative, and the cap can be exceeded by up to 500ms (`retry.js:8`).\n- **A reminder whose send always fails is retried forever**, about 3s every tick, with no attempt limit and no test.\n- **Delete doesn't check who owns the reminder** (`api.js:35`). Any caller can delete any id, and no test covers it.\n- **`queryLog` is never used by any test**, even though its comment in `db.js:7` says tests use it.\n- **DST:** a single fixed `tz_offset_min` puts users in DST zones 1h off after a clock change. That's a design limit, not a test gap, and IST has no DST.\n- **Unhandled rejection:** an error thrown by `tick()` inside `setInterval` would crash the Node 20 process. That becomes possible once reading from a real store can fail.",
+  "ttft_ms": 5081,
+  "type": "result",
+  "duration_ms": 226131,
+  "uuid": "061a621a-4ea6-4c73-8dfa-f2e975affbe5",
+  "ttft_stream_ms": 4893,
+  "time_to_request_ms": 24,
+  "first_content_frame_ms": 4893,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

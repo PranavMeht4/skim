@@ -1,0 +1,10 @@
+{
+  "name": "skim-shots",
+  "private": true,
+  "type": "module",
+  "description": "Replays recorded terminal sessions to HTML for the README screenshots.",
+  "dependencies": {
+    "@xterm/addon-serialize": "0.13.0",
+    "@xterm/headless": "5.5.0"
+  }
+}

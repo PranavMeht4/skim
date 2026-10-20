@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "jitter-correct",
+  "kind": "read",
+  "prompt": "Why does retry.js add jitter, and is its implementation right?",
+  "wall_ms": 85201,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 83698,
+  "stop_reason": "end_turn",
+  "session_id": "4cde5c84-eb64-41f8-b1f7-8b1ea52a5234",
+  "total_cost_usd": 0.4396252000000001,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 29598,
+    "cache_read_input_tokens": 379766,
+    "output_tokens": 6340,
+    "output_tokens_details": {
+      "thinking_tokens": 3616
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 29598,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2783,
+        "cache_read_input_tokens": 40918,
+        "cache_creation_input_tokens": 731,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 731
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 6340,
+      "cacheReadInputTokens": 379766,
+      "cacheCreationInputTokens": 29598,
+      "webSearchRequests": 0,
+      "costUSD": 0.4396252000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3616,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Tx2kjtxW3BuiFjQy2GgLs2",
+      "tool_input": {
+        "command": "ls -a && cat package.json 2>/dev/null; node -v; node --input-type=module -e \"\nimport { backoffDelay } from './src/retry.js';\nconst N=200000;\nfor (const a of [0,1,2,3]) {\n  let neg=0,min=Infinity,max=-Infinity;\n  for (let i=0;i<N;i++){const d=backoffDelay(a); if(d<0)neg++; min=Math.min(min,d); max=Math.max(max,d);}\n  console.log('attempt',a,'neg%',(100*neg/N).toFixed(1),'min',min.toFixed(0),'max',max.toFixed(0));\n}\nlet over=0; for(let i=0;i<N;i++){ if(backoffDelay(10)>10000) over++; } console.log('cap attempt10 over 10000 %',(100*over/N).toFixed(1));\nconst t=Date.now(); setTimeout(()=>console.log('setTimeout(-300) fired after',Date.now()-t,'ms'),-300);\n\" 2>&1; node --test 2>&1 | tail -8",
+        "description": "Measure backoff delay ranges and run tests"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Jitter is there so that many failed sends don't all retry at the same moment. The way it's implemented is partly wrong, and in this deployment it barely helps.**\n\n1. **Negative delays:** the jitter is a fixed **±500 ms** (`src/retry.js:8`), but the first backoffs are only 200 and 400 ms. About **30%** of first retries and **10%** of second retries get a delay below 0. Node runs those after **1 ms**, so the retry is instant, which defeats the backoff.\n2. **Doesn't scale with the delay:** ±500 ms is larger than the short delays, but only ±5% at the 10 s cap.\n3. **Can exceed `maxDelayMs`:** delays can reach **10,500 ms** (`src/retry.js:9`). Today's only caller (`attempts: 5`, `src/scheduler.js:16`) never gets near the cap, because its largest backoff is 1,600 ms.\n4. **Never tested:** the tests fix `Math.random` at 0.5 (`test/retry.test.js:6`), which makes jitter always 0, and nothing tests `backoffDelay` directly. That's how #1 went unnoticed.\n5. **Little benefit here:** the scheduler sends **one reminder at a time** (`await` in the loop, `src/scheduler.js:14-16`), and the README says **one process, no second instance** (`README.md:14`). There's never a crowd of retries to spread out.\n\n**Fix:** scale the jitter to the delay and remove `JITTER_MS`:\n\n```js\nexport function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {\n  const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);\n  return exp / 2 + Math.random() * (exp / 2); // \"equal jitter\": always in [exp/2, exp]\n}\n```\n\nThis can't go negative, never goes over the cap, and always waits at least half the backoff. \"Full jitter\" (`Math.random() * exp`) is the other common choice, but it can still produce near-zero waits. Also add a test that sets `Math.random` to 0 and to just under 1 and checks the delay stays within those bounds.\n\nDelay ranges for today's 4 retries:\n\n| Retry | Backoff | Current delay | With fix |\n|---|---|---|---|\n| 1 | 200 ms | −300 to 700 ms | 100 to 200 ms |\n| 2 | 400 ms | −100 to 900 ms | 200 to 400 ms |\n| 3 | 800 ms | 300 to 1,300 ms | 400 to 800 ms |\n| 4 | 1,600 ms | 1,100 to 2,100 ms | 800 to 1,600 ms |\n\n**Not verified:** I didn't run the code or the tests because the shell command wasn't approved. The numbers come from working through the code by hand. I haven't edited anything.\n\n**Also:** there's a timezone bug outside retry.js. `due_ms` is already UTC (`toUtcMs`, `src/api.js:16`), but `src/scheduler.js:9` subtracts the user's offset a second time. **IST reminders fire 5h30m early**, and users west of UTC get theirs hours late.",
+  "ttft_ms": 3296,
+  "type": "result",
+  "duration_ms": 84090,
+  "uuid": "c503a641-a5c1-4fef-8adb-c38b66ca4bd8",
+  "ttft_stream_ms": 3070,
+  "time_to_request_ms": 282,
+  "first_content_frame_ms": 3071,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,155 @@
+{
+  "arm": "default",
+  "case": "test-gaps",
+  "kind": "read",
+  "prompt": "Where are the test coverage gaps? Which ones matter most?",
+  "wall_ms": 205665,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 203423,
+  "stop_reason": "end_turn",
+  "session_id": "2be09cf8-fdfe-459b-9824-2d70144a694c",
+  "total_cost_usd": 0.9021558000000001,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 38400,
+    "cache_read_input_tokens": 324129,
+    "output_tokens": 11906,
+    "output_tokens_details": {
+      "thinking_tokens": 7422
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34578,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 2557,
+        "cache_read_input_tokens": 46313,
+        "cache_creation_input_tokens": 307,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 307
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 46241,
+        "output_tokens": 5922,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 2128,
+        "cache_read_input_tokens": 46620,
+        "cache_creation_input_tokens": 3822,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 3822,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 46259,
+      "outputTokens": 17828,
+      "cacheReadInputTokens": 324129,
+      "cacheCreationInputTokens": 38400,
+      "webSearchRequests": 0,
+      "costUSD": 0.9021558000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 7422,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Cq5kTYEYcEm5PxGmaAp4sU",
+      "tool_input": {
+        "command": "for f in package.json config.json README.md src/*.js test/*.js; do echo \"=== $f ===\"; cat -n \"$f\"; done",
+        "description": "Print all source, test, and config files"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01XgiQm7BKixeVJMh7ZAQpKP",
+      "tool_input": {
+        "command": "node --version && node --test test/ 2>&1 | tail -15; grep -rn \"legacy\\|queryLog\\|tick\\|search\" test/ || echo \"(no test references to legacy/queryLog/tick/search)\"",
+        "description": "Run test suite and check what tests reference"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WtHAR9zMWtrCwgrLTcdqQd",
+      "tool_input": {
+        "command": "node --test /private<tmp>/skim-eval-default-test-gaps-KvuWVR/reminder-service/test/",
+        "description": "Run the test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 21,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Your 9 tests cover the easy paths. The three things most likely to hurt users have no tests at all: the code that actually sends reminders, the search route, and anything with a timezone other than UTC.\n\nI couldn't run anything because `node` needed approval, so this comes from reading all 351 lines. The test cases below are worked out by hand and haven't been run.\n\n## Why passing tests prove little here\n\nEach test avoids the setup production actually uses:\n- **Scheduler tests** use only `tz_offset_min: 0`, so any mistake in timezone handling cancels out.\n- **The notify test** uses the `'format'` formatter, but production uses `'legacy'` (`config.json` and the default in `notify.js:14`).\n- **The retry tests** fix `Math.random` at 0.5, so the random part of the retry delay is never tested.\n- **Nothing tests across modules.** No test creates a reminder through the API and then checks when the scheduler sends it.\n\n## Ranked by what matters\n\n**1. Reminders fire at the wrong time for every user outside UTC.**\n- The reminder time is converted to UTC when it's saved (`src/api.js:8`), then converted again when checking if it's due (`src/scheduler.js:9`).\n- An IST user who sets 09:00 gets the reminder at 03:30 IST, 5.5 hours early. US users get theirs hours late.\n- The scheduler is the side to fix. The README, `toUtcMs` and its test all agree the saved time is already UTC, and the comment at `scheduler.js:7` is out of date.\n- Test that fails today: create `{at:'2026-03-01T09:00', tzOffsetMin:330}`, then check that `dueReminders(rows, Date.parse('2026-03-01T03:29:59Z'))` returns no reminders. It returns one.\n\n**2. The search route has no tests, and it's the only query built by pasting user input into SQL (`src/api.js:30-31`).**\n- **Today:** searching for `'milk and eggs'` makes `handle()` throw. The in-memory database splits the query on `AND`, including the `and` inside the search text.\n- **After the move to a real database** (the README's open item, since data must survive restarts): this is SQL injection, and an apostrophe in a search becomes a syntax error.\n- The right test sends a request through `handle()` and checks `queryLog`. The user's text should be passed as a parameter, never pasted into the SQL. `db.js:7` says `queryLog` exists for exactly this, but no test uses it. A test like that will still work after the database is replaced.\n\n**3. The code that actually sends reminders (`tick()`) is untested.**\n- `legacy.js` says \"TODO: remove\" and nothing imports it directly, only by name from config. Deleting it would leave every test passing and stop all deliveries without any visible error. Each send would fail, retry five times, log a line, and repeat every tick.\n- Nothing checks that a reminder is marked sent and not sent again on the next tick.\n- This is probably why `tick()` has no tests: it hardcodes `{ attempts: 5 }` and doesn't let callers change the retry settings (`scheduler.js:16`). Any test where a send fails would wait about 3 seconds of real retry delay. Letting callers pass the retry settings in, or using `mock.timers`, would make those tests easy to write.\n\n**4. Medium priority**\n- **Bad input is accepted and then never fires.** For example `tzOffsetMin: '+05:30'`, or an `at` that isn't a valid date: the saved time becomes `NaN`, the API returns 201, and the reminder is never due.\n- **Missing query crashes.** A GET to `/reminders` or `/reminders/search` with no query object throws a TypeError at `q.userId`.\n- **Duplicate sends.** `setInterval` doesn't wait for the previous tick to finish. If sends are slow or failing (about 10 failing reminders in one tick is enough), two ticks run at once and both send the same reminders. This only shows up once sending goes over a real network.\n\n**5. Low priority**\n- The random part of the retry delay is fixed at ±500 ms, so the delay can be negative on the first attempt or go over the 10-second cap.\n- `index.js` and loading `config.json` are untested.\n- Anyone can list or delete any user's reminders. That's a missing permission check in the design rather than a test gap.\n\n**Question:** the README calls `format.js` the \"current message format\", but production uses `legacy`. Is that on purpose?\n\n**Suggested order:** since moving to a real database is the next change, start with tests that go through `handle()` and `tick()` and check results via `queryLog`. They'll keep working when `db.js` is rewritten. If you allow `node` to run, I can add the three failing tests (items 1–3) and confirm they fail for the reasons above.",
+  "ttft_ms": 2624,
+  "type": "result",
+  "duration_ms": 204228,
+  "uuid": "9527912e-8b75-4fa8-a71a-9cbaec375166",
+  "ttft_stream_ms": 2393,
+  "time_to_request_ms": 140,
+  "first_content_frame_ms": 2393,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

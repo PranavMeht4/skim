@@ -1,0 +1,116 @@
+{
+  "arm": "concise",
+  "case": "bug-timezone",
+  "kind": "read",
+  "prompt": "Users in India (UTC+5:30) say their reminders arrive about 5 hours before the time they set. UTC users are fine. What is causing it?",
+  "wall_ms": 26253,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 24490,
+  "stop_reason": "end_turn",
+  "session_id": "00cffc89-ebce-4a76-9fe6-80bb41f108dc",
+  "total_cost_usd": 0.2730964,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 26157,
+    "cache_read_input_tokens": 144102,
+    "output_tokens": 1749,
+    "output_tokens_details": {
+      "thinking_tokens": 265
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26157,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 457,
+        "cache_read_input_tokens": 37440,
+        "cache_creation_input_tokens": 768,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 768
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1749,
+      "cacheReadInputTokens": 144102,
+      "cacheCreationInputTokens": 26157,
+      "webSearchRequests": 0,
+      "costUSD": 0.2730964,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 265,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01CVntnzSd7owfJxvStx8rbg",
+      "tool_input": {
+        "command": "for f in src/*.js config.json README.md; do echo \"=== $f\"; cat -n \"$f\"; done",
+        "description": "Print source files"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The timezone offset is subtracted twice, so reminders fire 5h30m early for India (+330 min).\n\n1. `src/api.js:8`: `toUtcMs` already converts the local time to UTC (`Date.parse(at + 'Z') - tzOffsetMin * 60_000`), and that UTC value is what gets stored in `due_ms`.\n2. `src/scheduler.js:9`: `dueReminders` then subtracts the offset again (`r.due_ms - r.tz_offset_min * 60_000`). The comment above it wrongly says `due_ms` is wall-clock time.\n\nFor UTC users the offset is 0, so subtracting it twice changes nothing. That's why they see no problem, and also why `test/scheduler.test.js` doesn't catch it: every test uses `tz_offset_min: 0`.\n\n**Fix:** in `scheduler.js:9`, compare `r.due_ms <= nowMs` directly and correct the comment. Then add a test with `tz_offset_min: 330` that creates a reminder through the API path. I haven't changed any code.\n\n**Separate security issue:** `searchReminders` at `src/api.js:31` builds its SQL by joining in `q.userId` and `q.q` directly, which allows SQL injection. It should use `?` parameters like the other queries do.",
+  "ttft_ms": 2574,
+  "type": "result",
+  "duration_ms": 24988,
+  "uuid": "d3634aa7-bc0d-4e60-bfbc-5dd7799e15ab",
+  "ttft_stream_ms": 2261,
+  "time_to_request_ms": 25,
+  "first_content_frame_ms": 2261,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

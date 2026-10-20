@@ -1,0 +1,55 @@
+diff -ruN <repo>/evals/fixture/src/api.js <tmp>/skim-eval-skim-fix-sql-oXNS58/reminder-service/src/api.js
+--- <repo>/evals/fixture/src/api.js	2026-10-20 14:37:32
++++ <tmp>/skim-eval-skim-fix-sql-oXNS58/reminder-service/src/api.js	2026-10-20 15:12:56
+@@ -27,9 +27,11 @@
+ }
+ 
+ function searchReminders({ query: q }) {
+-  const sql =
+-    "SELECT * FROM reminders WHERE user_id = '" + q.userId + "' AND text LIKE '%" + q.q + "%'";
+-  return { status: 200, body: query(sql) };
++  const rows = query('SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?', [
++    q.userId,
++    `%${q.q}%`,
++  ]);
++  return { status: 200, body: rows };
+ }
+ 
+ function deleteReminder({ path }) {
+diff -ruN <repo>/evals/fixture/test/api.test.js <tmp>/skim-eval-skim-fix-sql-oXNS58/reminder-service/test/api.test.js
+--- <repo>/evals/fixture/test/api.test.js	2026-10-20 14:37:56
++++ <tmp>/skim-eval-skim-fix-sql-oXNS58/reminder-service/test/api.test.js	2026-10-20 15:12:28
+@@ -1,7 +1,7 @@
+ import { test, beforeEach } from 'node:test';
+ import assert from 'node:assert/strict';
+ import { handle, toUtcMs } from '../src/api.js';
+-import { reset } from '../src/db.js';
++import { reset, queryLog } from '../src/db.js';
+ 
+ beforeEach(() => reset());
+ 
+@@ -30,6 +30,24 @@
+   create({ userId: 'u2', text: 'b', at: '2026-03-01T09:00' });
+   const res = handle({ method: 'GET', path: '/reminders', query: { userId: 'u1' } });
+   assert.deepEqual(res.body.map((r) => r.text), ['a']);
++});
++
++test('search matches text for that user only', () => {
++  create({ userId: 'u1', text: "call mum's dentist", at: '2026-03-01T09:00' });
++  create({ userId: 'u1', text: 'buy milk', at: '2026-03-01T09:00' });
++  create({ userId: 'u2', text: 'call bob', at: '2026-03-01T09:00' });
++  const search = (query) => handle({ method: 'GET', path: '/reminders/search', query });
++  assert.deepEqual(search({ userId: 'u1', q: 'call' }).body.map((r) => r.text), ["call mum's dentist"]);
++  assert.deepEqual(search({ userId: 'u1', q: "mum's" }).body.map((r) => r.text), ["call mum's dentist"]);
++});
++
++test('search passes user input as parameters, never in the SQL text', () => {
++  const userId = "u1' OR '1'='1";
++  const q = "%' OR '1'='1";
++  handle({ method: 'GET', path: '/reminders/search', query: { userId, q } });
++  const { sql, params } = queryLog.at(-1);
++  assert.equal(sql, 'SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?');
++  assert.deepEqual(params, [userId, `%${q}%`]);
+ });
+ 
+ test('delete removes a reminder, then 404s', () => {

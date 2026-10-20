@@ -1,0 +1,1156 @@
+{
+  "meta": {
+    "date": "2026-10-20-liteplus",
+    "judgeModel": "sonnet",
+    "judgePasses": 3,
+    "judgePassesCompleted": {
+      "min": 3,
+      "max": 3
+    },
+    "judgeCostUsd": 1.6712,
+    "judgeFailedCalls": 0,
+    "runCostUsd": 21.2481
+  },
+  "arms": {
+    "default": {
+      "readCells": 10,
+      "failedCells": 0,
+      "mustHaveFullPct": 94.4,
+      "mustHaveFirst12Pct": 44.4,
+      "factsFull": "34.0/36",
+      "factsFirst12": "16.0/36",
+      "mustHaveFirst24RowsPct": 52.8,
+      "medianRows": 58.5,
+      "fitsScreenRowsPct": 30,
+      "medianWordsFirst12": 165.5,
+      "answerFirstBoldPct": 0,
+      "answerFirstJudgePct": 70,
+      "medianLines": 35.5,
+      "medianWords": 640,
+      "walls": 9,
+      "answersWithWall": 6,
+      "fitsScreenPct": 60,
+      "medianOutputTokens": 8970.5,
+      "avgOutputTokens": 6989,
+      "avgThinkingTokens": 3484,
+      "avgReplyTokens": 1047,
+      "medianWallS": 110.60150000000002,
+      "medianTurns": 15.5,
+      "costReadUsd": 6.0329,
+      "costFixUsd": 1.8501,
+      "fixPassed": "3/3",
+      "medianFixLines": 14,
+      "medianFixRows": 23,
+      "fixAnswerFirstBoldPct": 0,
+      "permissionDenials": 19
+    },
+    "concise": {
+      "readCells": 10,
+      "failedCells": 0,
+      "mustHaveFullPct": 85.2,
+      "mustHaveFirst12Pct": 69.4,
+      "factsFull": "30.7/36",
+      "factsFirst12": "25.0/36",
+      "mustHaveFirst24RowsPct": 71.3,
+      "medianRows": 37,
+      "fitsScreenRowsPct": 60,
+      "medianWordsFirst12": 230.5,
+      "answerFirstBoldPct": 10,
+      "answerFirstJudgePct": 100,
+      "medianLines": 21,
+      "medianWords": 397,
+      "walls": 4,
+      "answersWithWall": 4,
+      "fitsScreenPct": 90,
+      "medianOutputTokens": 5015.5,
+      "avgOutputTokens": 4528,
+      "avgThinkingTokens": 2191,
+      "avgReplyTokens": 679,
+      "medianWallS": 87.5495,
+      "medianTurns": 9.5,
+      "costReadUsd": 5.0499,
+      "costFixUsd": 0,
+      "fixPassed": "n/a",
+      "medianFixLines": null,
+      "medianFixRows": null,
+      "fixAnswerFirstBoldPct": null,
+      "permissionDenials": 11
+    },
+    "skim": {
+      "readCells": 10,
+      "failedCells": 0,
+      "mustHaveFullPct": 97.2,
+      "mustHaveFirst12Pct": 77.8,
+      "factsFull": "35.0/36",
+      "factsFirst12": "28.0/36",
+      "mustHaveFirst24RowsPct": 76.9,
+      "medianRows": 50.5,
+      "fitsScreenRowsPct": 40,
+      "medianWordsFirst12": 248,
+      "answerFirstBoldPct": 100,
+      "answerFirstJudgePct": 100,
+      "medianLines": 26.5,
+      "medianWords": 477.5,
+      "walls": 0,
+      "answersWithWall": 0,
+      "fitsScreenPct": 70,
+      "medianOutputTokens": 8044,
+      "avgOutputTokens": 7125,
+      "avgThinkingTokens": 3591,
+      "avgReplyTokens": 894,
+      "medianWallS": 131.5845,
+      "medianTurns": 16.5,
+      "costReadUsd": 6.4346,
+      "costFixUsd": 1.8806,
+      "fixPassed": "3/3",
+      "medianFixLines": 11,
+      "medianFixRows": 22,
+      "fixAnswerFirstBoldPct": 100,
+      "permissionDenials": 21
+    }
+  },
+  "paired": {
+    "skim_vs_default": {
+      "fullWTL": [
+        1,
+        9,
+        0
+      ],
+      "first12WTL": [
+        7,
+        1,
+        2
+      ],
+      "first24RowsWTL": [
+        7,
+        3,
+        0
+      ],
+      "shorterLines": [
+        8,
+        0,
+        2
+      ],
+      "shorterRows": [
+        8,
+        0,
+        2
+      ]
+    },
+    "skim_vs_concise": {
+      "fullWTL": [
+        3,
+        7,
+        0
+      ],
+      "first12WTL": [
+        4,
+        3,
+        3
+      ],
+      "first24RowsWTL": [
+        4,
+        3,
+        3
+      ],
+      "shorterLines": [
+        0,
+        0,
+        10
+      ],
+      "shorterRows": [
+        1,
+        0,
+        9
+      ]
+    }
+  },
+  "perCase": [
+    {
+      "arm": "default",
+      "case": "lookup-retries",
+      "facts": 3,
+      "full": 3,
+      "first12": 2.67,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 11,
+      "renderedRows": 18,
+      "first24RowsFacts": 2,
+      "words": 154,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 1220,
+      "wallS": 20,
+      "turns": 6,
+      "costUsd": 0.2251,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 0.6666666666666666
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "concise",
+      "case": "lookup-retries",
+      "facts": 3,
+      "full": 2.67,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 3,
+      "renderedRows": 8,
+      "first24RowsFacts": 2.33,
+      "words": 96,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 908,
+      "wallS": 18,
+      "turns": 6,
+      "costUsd": 0.2358,
+      "judgeAgreement": {
+        "full": 0.6666666666666666,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "skim",
+      "case": "lookup-retries",
+      "facts": 3,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 7,
+      "renderedRows": 13,
+      "first24RowsFacts": 2.67,
+      "words": 144,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 1494,
+      "wallS": 21,
+      "turns": 9,
+      "costUsd": 0.2561,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "default",
+      "case": "flow-create-to-delivery",
+      "facts": 4,
+      "full": 4,
+      "first12": 0,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 57,
+      "renderedRows": 84,
+      "first24RowsFacts": 1,
+      "words": 764,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 0,
+      "walls": 2,
+      "tables": 1,
+      "outTokens": 9154,
+      "wallS": 135,
+      "turns": 21,
+      "costUsd": 0.7984,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "concise",
+      "case": "flow-create-to-delivery",
+      "facts": 4,
+      "full": 4,
+      "first12": 4,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 31,
+      "renderedRows": 55,
+      "first24RowsFacts": 3,
+      "words": 593,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 6655,
+      "wallS": 143,
+      "turns": 18,
+      "costUsd": 0.7926,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "skim",
+      "case": "flow-create-to-delivery",
+      "facts": 4,
+      "full": 4,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 32,
+      "renderedRows": 57,
+      "first24RowsFacts": 3,
+      "words": 498,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 7338,
+      "wallS": 137,
+      "turns": 18,
+      "costUsd": 0.7757,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 0.5
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "default",
+      "case": "bug-timezone",
+      "facts": 4,
+      "full": 4,
+      "first12": 1,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 28,
+      "renderedRows": 38,
+      "first24RowsFacts": 2,
+      "words": 266,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 3458,
+      "wallS": 43,
+      "turns": 12,
+      "costUsd": 0.3306,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 2
+    },
+    {
+      "arm": "concise",
+      "case": "bug-timezone",
+      "facts": 4,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 10,
+      "renderedRows": 17,
+      "first24RowsFacts": 3,
+      "words": 158,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 1749,
+      "wallS": 26,
+      "turns": 9,
+      "costUsd": 0.2731,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "skim",
+      "case": "bug-timezone",
+      "facts": 4,
+      "full": 4,
+      "first12": 4,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 11,
+      "renderedRows": 21,
+      "first24RowsFacts": 4,
+      "words": 232,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 3193,
+      "wallS": 52,
+      "turns": 14,
+      "costUsd": 0.336,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 2
+    },
+    {
+      "arm": "default",
+      "case": "compare-storage",
+      "facts": 3,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 33,
+      "renderedRows": 61,
+      "first24RowsFacts": 3,
+      "words": 696,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 8952,
+      "wallS": 200,
+      "turns": 19,
+      "costUsd": 0.8871,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "concise",
+      "case": "compare-storage",
+      "facts": 3,
+      "full": 1,
+      "first12": 0,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 22,
+      "renderedRows": 39,
+      "first24RowsFacts": 1.33,
+      "words": 454,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 4388,
+      "wallS": 114,
+      "turns": 13,
+      "costUsd": 0.6501,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 2
+    },
+    {
+      "arm": "skim",
+      "case": "compare-storage",
+      "facts": 3,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 46,
+      "renderedRows": 70,
+      "first24RowsFacts": 3,
+      "words": 590,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 9809,
+      "wallS": 140,
+      "turns": 20,
+      "costUsd": 0.8249,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 4
+    },
+    {
+      "arm": "default",
+      "case": "review-api",
+      "facts": 3,
+      "full": 3,
+      "first12": 0.67,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 29,
+      "renderedRows": 55,
+      "first24RowsFacts": 1,
+      "words": 584,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 0,
+      "walls": 2,
+      "tables": 0,
+      "outTokens": 8989,
+      "wallS": 86,
+      "turns": 13,
+      "costUsd": 0.5076,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 0.6666666666666666
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "concise",
+      "case": "review-api",
+      "facts": 3,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 13,
+      "renderedRows": 31,
+      "first24RowsFacts": 3,
+      "words": 340,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 5643,
+      "wallS": 61,
+      "turns": 10,
+      "costUsd": 0.3905,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "skim",
+      "case": "review-api",
+      "facts": 3,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 21,
+      "renderedRows": 44,
+      "first24RowsFacts": 2,
+      "words": 457,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 11616,
+      "wallS": 136,
+      "turns": 15,
+      "costUsd": 0.871,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 4
+    },
+    {
+      "arm": "default",
+      "case": "plan-quiet-hours",
+      "facts": 4,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 59,
+      "renderedRows": 98,
+      "first24RowsFacts": 1.67,
+      "words": 969,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 11627,
+      "wallS": 188,
+      "turns": 21,
+      "costUsd": 0.8846,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "concise",
+      "case": "plan-quiet-hours",
+      "facts": 4,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 46,
+      "renderedRows": 63,
+      "first24RowsFacts": 2,
+      "words": 641,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 6526,
+      "wallS": 128,
+      "turns": 18,
+      "costUsd": 0.736,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "skim",
+      "case": "plan-quiet-hours",
+      "facts": 4,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 73,
+      "renderedRows": 102,
+      "first24RowsFacts": 3,
+      "words": 868,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 10306,
+      "wallS": 155,
+      "turns": 19,
+      "costUsd": 0.804,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 2
+    },
+    {
+      "arm": "default",
+      "case": "safe-delete-legacy",
+      "facts": 3,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 18,
+      "renderedRows": 26,
+      "first24RowsFacts": 3,
+      "words": 247,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 2069,
+      "wallS": 26,
+      "turns": 11,
+      "costUsd": 0.2766,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "concise",
+      "case": "safe-delete-legacy",
+      "facts": 3,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 12,
+      "renderedRows": 18,
+      "first24RowsFacts": 3,
+      "words": 148,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 1552,
+      "wallS": 16,
+      "turns": 9,
+      "costUsd": 0.2452,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "skim",
+      "case": "safe-delete-legacy",
+      "facts": 3,
+      "full": 3,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 15,
+      "renderedRows": 25,
+      "first24RowsFacts": 3,
+      "words": 231,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 2767,
+      "wallS": 37,
+      "turns": 13,
+      "costUsd": 0.2835,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "default",
+      "case": "jitter-correct",
+      "facts": 4,
+      "full": 4,
+      "first12": 1,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 38,
+      "renderedRows": 56,
+      "first24RowsFacts": 2,
+      "words": 464,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 2,
+      "tables": 1,
+      "outTokens": 3227,
+      "wallS": 73,
+      "turns": 5,
+      "costUsd": 0.4864,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "concise",
+      "case": "jitter-correct",
+      "facts": 4,
+      "full": 4,
+      "first12": 4,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 20,
+      "renderedRows": 35,
+      "first24RowsFacts": 4,
+      "words": 322,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 2252,
+      "wallS": 37,
+      "turns": 4,
+      "costUsd": 0.2412,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 0
+    },
+    {
+      "arm": "skim",
+      "case": "jitter-correct",
+      "facts": 4,
+      "full": 4,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 21,
+      "renderedRows": 34,
+      "first24RowsFacts": 3,
+      "words": 301,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 3951,
+      "wallS": 84,
+      "turns": 5,
+      "costUsd": 0.5574,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "default",
+      "case": "overview",
+      "facts": 4,
+      "full": 3,
+      "first12": 0,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 100,
+      "renderedRows": 134,
+      "first24RowsFacts": 0,
+      "words": 1068,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 0,
+      "walls": 1,
+      "tables": 1,
+      "outTokens": 9288,
+      "wallS": 138,
+      "turns": 18,
+      "costUsd": 0.7344,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 1
+    },
+    {
+      "arm": "concise",
+      "case": "overview",
+      "facts": 4,
+      "full": 3,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 24,
+      "renderedRows": 51,
+      "first24RowsFacts": 2,
+      "words": 567,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 1,
+      "tables": 0,
+      "outTokens": 6550,
+      "wallS": 122,
+      "turns": 19,
+      "costUsd": 0.7274,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 2
+    },
+    {
+      "arm": "skim",
+      "case": "overview",
+      "facts": 4,
+      "full": 4,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 50,
+      "renderedRows": 75,
+      "first24RowsFacts": 1,
+      "words": 611,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 8750,
+      "wallS": 127,
+      "turns": 21,
+      "costUsd": 0.7692,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "default",
+      "case": "test-gaps",
+      "facts": 4,
+      "full": 4,
+      "first12": 3.67,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 43,
+      "renderedRows": 74,
+      "first24RowsFacts": 3.33,
+      "words": 758,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 11906,
+      "wallS": 206,
+      "turns": 21,
+      "costUsd": 0.9022,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 0.75
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "concise",
+      "case": "test-gaps",
+      "facts": 4,
+      "full": 4,
+      "first12": 2,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 29,
+      "renderedRows": 49,
+      "first24RowsFacts": 2,
+      "words": 501,
+      "answerFirstBold": false,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 0,
+      "outTokens": 9058,
+      "wallS": 147,
+      "turns": 6,
+      "costUsd": 0.7579,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 3
+    },
+    {
+      "arm": "skim",
+      "case": "test-gaps",
+      "facts": 4,
+      "full": 4,
+      "first12": 3,
+      "judgePasses": [
+        3,
+        3
+      ],
+      "lines": 33,
+      "renderedRows": 61,
+      "first24RowsFacts": 3,
+      "words": 700,
+      "answerFirstBold": true,
+      "firstLineAnswersJudge": 1,
+      "walls": 0,
+      "tables": 1,
+      "outTokens": 12022,
+      "wallS": 229,
+      "turns": 21,
+      "costUsd": 0.9567,
+      "judgeAgreement": {
+        "full": 1,
+        "first12": 1
+      },
+      "judgeUnknown": 0,
+      "denials": 4
+    }
+  ],
+  "fix": [
+    {
+      "arm": "default",
+      "id": "fix-timezone",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 13,
+        "pass": 13,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 33,
+      "outTokens": 7009,
+      "wallS": 138.557,
+      "turns": 25,
+      "cost": 0.7745681999999999,
+      "lines": 19,
+      "answerFirstBold": false
+    },
+    {
+      "arm": "skim",
+      "id": "fix-timezone",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 13,
+        "pass": 13,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 22,
+      "outTokens": 4611,
+      "wallS": 65.426,
+      "turns": 19,
+      "cost": 0.6468166,
+      "lines": 11,
+      "answerFirstBold": true
+    },
+    {
+      "arm": "default",
+      "id": "fix-sql",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 13,
+        "pass": 13,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 23,
+      "outTokens": 8398,
+      "wallS": 110.48,
+      "turns": 14,
+      "cost": 0.7932132000000001,
+      "lines": 13,
+      "answerFirstBold": false
+    },
+    {
+      "arm": "skim",
+      "id": "fix-sql",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 13,
+        "pass": 13,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 25,
+      "outTokens": 6362,
+      "wallS": 127.734,
+      "turns": 15,
+      "cost": 0.945727,
+      "lines": 14,
+      "answerFirstBold": true
+    },
+    {
+      "arm": "default",
+      "id": "fix-jitter",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 12,
+        "pass": 12,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 20,
+      "outTokens": 2029,
+      "wallS": 31.392,
+      "turns": 7,
+      "cost": 0.2822844,
+      "lines": 14,
+      "answerFirstBold": false
+    },
+    {
+      "arm": "skim",
+      "id": "fix-jitter",
+      "pass": true,
+      "reasons": [],
+      "tests": {
+        "total": 14,
+        "pass": 14,
+        "fail": 0
+      },
+      "ok": true,
+      "rows": 16,
+      "outTokens": 2513,
+      "wallS": 39.398,
+      "turns": 7,
+      "cost": 0.288056,
+      "lines": 10,
+      "answerFirstBold": true
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "arm": "skim",
+  "case": "fix-sql",
+  "kind": "fix",
+  "prompt": "The search endpoint in src/api.js builds its SQL by string concatenation. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 111802,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 109866,
+  "stop_reason": "end_turn",
+  "session_id": "948167a9-78e0-47eb-8b1d-34b59de02d32",
+  "total_cost_usd": 0.6693,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 33367,
+    "cache_read_input_tokens": 324275,
+    "output_tokens": 6163,
+    "output_tokens_details": {
+      "thinking_tokens": 3110
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 32710,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 588,
+        "cache_read_input_tokens": 43782,
+        "cache_creation_input_tokens": 979,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 979
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 42405,
+      "outputTokens": 8493,
+      "cacheReadInputTokens": 324275,
+      "cacheCreationInputTokens": 33367,
+      "webSearchRequests": 0,
+      "costUSD": 0.6693,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3110,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**The search endpoint now uses a parameterized query, and all 13 tests pass** (`node --test test/`: 13 pass, 0 fail).\n\n1. **Fix:** `src/api.js:29` now runs `SELECT * FROM reminders WHERE user_id = ? AND text LIKE ?` and passes `[q.userId, `%${q.q}%`]` as parameters. No user input goes into the SQL string anymore.\n2. **Two tests added** in `test/api.test.js`:\n   - `:36`: search returns only that user's reminders whose text matches, ignoring case.\n   - `:45`: **injection test.** Malicious `userId` and `q` values return `[]`. It also checks that the SQL sent to `db.js` is the fixed template, with the values in `params`.\n3. **I ran the injection test against the old code first, and it failed** as it should. The SQL it caught:\n   ```\n   actual: \"SELECT * FROM reminders WHERE user_id = 'u1' OR '1'='1' AND text LIKE '%%' AND user_id LIKE '%%'\"\n   ```\n\nThat was the **only string-built query**. The other queries, in `api.js` and `scheduler.js`, already used fixed SQL with `?` placeholders.\n\n**Also** (not fixed, outside what you asked):\n- **`%` and `_` typed into a search still act as LIKE wildcards.** This doesn't allow injection, but searching for `%` matches everything. Fixing it needs an `ESCAPE` clause, which the in-memory `db.js` doesn't support.\n- **A missing `q` or `userId` isn't checked.** With no `q`, the search looks for `%undefined%`, as the old code did.\n- The folder isn't a git repo, so **nothing was committed**.",
+  "ttft_ms": 5298,
+  "type": "result",
+  "duration_ms": 110505,
+  "uuid": "ca8a584a-dda0-4527-ac25-fc1286a5800b",
+  "ttft_stream_ms": 5094,
+  "time_to_request_ms": 23,
+  "first_content_frame_ms": 5094,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}

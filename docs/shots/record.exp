@@ -1,0 +1,36 @@
+# record.exp <repo> <workdir> <prompt> <out.log> <model> <default|skim>
+# Drives a real interactive Claude Code session in an 88-column terminal and logs
+# every byte it draws (claude.ai artifacts off, so replies stay in the terminal).
+# The skim arm loads this repo as a plugin and turns its
+# style on; the default arm keeps any installed skim switched off.
+set repo [lindex $argv 0]
+set workdir [lindex $argv 1]
+set prompt [lindex $argv 2]
+set out [lindex $argv 3]
+set model [lindex $argv 4]
+cd $workdir
+log_file -noappend $out
+if {[lindex $argv 5] eq "skim"} {
+  spawn -noecho env TERM=xterm-256color COLORTERM=truecolor claude --model $model --disallowedTools Artifact --plugin-dir $repo --settings {{"outputStyle":"skim:skim","enabledPlugins":{"skim@skim":false}}}
+} else {
+  spawn -noecho env TERM=xterm-256color COLORTERM=truecolor claude --model $model --disallowedTools Artifact --settings {{"enabledPlugins":{"skim@skim":false}}}
+}
+stty rows 150 columns 88 < $spawn_out(slave,name)
+# Trust the temp folder: move to "Yes, I trust this folder" and confirm.
+set timeout 8
+expect timeout {}
+send "\033\[B"; sleep 0.5; send "\r"
+set timeout 10
+expect timeout {}
+send -- $prompt
+sleep 1
+send "\r"
+# Done when the screen has been quiet for 40 s (the spinner redraws while it works).
+set timeout 40
+expect {
+  -re ".+" { exp_continue }
+  timeout { }
+}
+send "\x03"; sleep 1; send "\x03"
+set timeout 10
+expect eof

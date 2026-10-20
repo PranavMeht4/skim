@@ -1,0 +1,12 @@
+{
+  "name": "reminder-service",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Small service that stores reminders and delivers them at the time the user asked for.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test test/"
+  }
+}

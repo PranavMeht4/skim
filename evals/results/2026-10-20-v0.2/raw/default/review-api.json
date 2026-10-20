@@ -1,0 +1,143 @@
+{
+  "arm": "default",
+  "case": "review-api",
+  "kind": "read",
+  "prompt": "Review src/api.js. What are the real problems?",
+  "wall_ms": 85992,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 84686,
+  "stop_reason": "end_turn",
+  "session_id": "9decd249-3783-4751-a270-21974ca6352e",
+  "total_cost_usd": 0.5076116,
+  "usage": {
+    "input_tokens": 1942,
+    "cache_creation_input_tokens": 31954,
+    "cache_read_input_tokens": 322158,
+    "output_tokens": 8989,
+    "output_tokens_details": {
+      "thinking_tokens": 4486
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 31954,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 1890,
+        "cache_read_input_tokens": 43635,
+        "cache_creation_input_tokens": 361,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 361
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 1926,
+        "output_tokens": 1430,
+        "cache_read_input_tokens": 43996,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 1942,
+      "outputTokens": 8989,
+      "cacheReadInputTokens": 322158,
+      "cacheCreationInputTokens": 31954,
+      "webSearchRequests": 0,
+      "costUSD": 0.5076116,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4486,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01C5MYHievpyMQjmuhZrbqSi",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -8; mkdir -p /tmp/api-review && cat > /tmp/api-review/probe.mjs <<'EOF'\nconst root = process.argv[2];\nconst { handle } = await import(`${root}/src/api.js`);\nconst { reset, queryLog } = await import(`${root}/src/db.js`);\nconst { dueReminders } = await import(`${root}/src/scheduler.js`);\n\n// 1. End-to-end: IST user, 09:00 local = 03:30Z\nreset();\nconst r = handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 } }).body;\nconsole.log('stored due_ms', new Date(r.due_ms).toISOString());\nfor (const t of ['2026-02-28T22:00:00Z', '2026-03-01T03:30:00Z']) console.log('  due at', t, '->', dueReminders([r], Date.parse(t)).length);\n\n// 2. Bad `at` formats\nfor (const at of ['2026-03-01T09:00:00', '2026-03-01', 'tomorrow', '2026-03-01T09:00Z']) {\n  reset();\n  const res = handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at } });\n  console.log('at', JSON.stringify(at), '->', res.status, 'due_ms', res.body.due_ms);\n}\n// non-numeric offset\nreset();\nconsole.log('tz \"abc\" ->', handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 'abc' } }).body.due_ms);\n\n// 3. Search SQL built by concatenation\nreset();\nhandle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'secret', at: '2026-03-01T09:00' } });\nhandle({ method: 'GET', path: '/reminders/search', query: { userId: \"u2\", q: \"x\" } });\nhandle({ method: 'GET', path: '/reminders/search', query: { userId: \"u2' OR '1'='1\", q: \"\" } });\nconsole.log('SQL:', queryLog.at(-1).sql);\ntry { handle({ method: 'GET', path: '/reminders/search', query: { userId: \"u1\", q: \"a' OR 'b\" } }); console.log('no throw'); } catch (e) { console.log('search throws:', e.message); }\n\n// 4. missing query object\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('list w/o query throws:', e.message); }\nEOF\nnode /tmp/api-review/probe.mjs \"$PWD\"",
+        "description": "Run tests and probe api.js behavior"
+      }
+    },
+    {
+      "tool_name": "Write",
+      "tool_use_id": "toolu_01DpjiEBaLV5cw77BVFPnxYM",
+      "tool_input": {
+        "file_path": "/tmp/api-review/probe.mjs",
+        "content": "const root = process.argv[2];\nconst { handle } = await import(`${root}/src/api.js`);\nconst { reset, queryLog } = await import(`${root}/src/db.js`);\nconst { dueReminders } = await import(`${root}/src/scheduler.js`);\n\n// 1. End-to-end: IST user, 09:00 local = 03:30Z\nreset();\nconst r = handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 330 } }).body;\nconsole.log('stored due_ms', new Date(r.due_ms).toISOString());\nfor (const t of ['2026-02-28T22:00:00Z', '2026-03-01T03:30:00Z']) console.log('  due at', t, '->', dueReminders([r], Date.parse(t)).length);\n\n// 2. Bad `at` formats\nfor (const at of ['2026-03-01T09:00:00', '2026-03-01', 'tomorrow', '2026-03-01T09:00Z']) {\n  reset();\n  const res = handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at } });\n  console.log('at', JSON.stringify(at), '->', res.status, 'due_ms', res.body.due_ms);\n}\nreset();\nconsole.log('tz \"abc\" ->', handle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'x', at: '2026-03-01T09:00', tzOffsetMin: 'abc' } }).body.due_ms);\n\n// 3. Search SQL built by concatenation\nreset();\nhandle({ method: 'POST', path: '/reminders', body: { userId: 'u1', text: 'secret', at: '2026-03-01T09:00' } });\nhandle({ method: 'GET', path: '/reminders/search', query: { userId: \"u2' OR '1'='1\", q: '' } });\nconsole.log('SQL:', queryLog.at(-1).sql);\ntry { handle({ method: 'GET', path: '/reminders/search', query: { userId: 'u1' } }); console.log('SQL:', queryLog.at(-1).sql); } catch (e) { console.log('throws:', e.message); }\n\n// 4. missing query object\ntry { handle({ method: 'GET', path: '/reminders' }); } catch (e) { console.log('list w/o query throws:', e.message); }\n"
+      }
+    },
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01XfWRHq5bh9vKF46vWzspyL",
+      "tool_input": {
+        "command": "node --test test/ 2>&1 | tail -8",
+        "description": "Run the test suite"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found four real problems, listed most serious first. I couldn't run anything (the test and probe commands needed permissions I didn't have), so all of this comes from reading the code, not from a run.\n\n### 1. Reminders fire at the wrong time for any user not on UTC\nThe bug is in the scheduler, not in `api.js`. `toUtcMs` (`src/api.js:8`) is correct: `due_ms` is stored as UTC, which matches the README. But `src/scheduler.js:9` applies the offset a second time: `r.due_ms - r.tz_offset_min * 60_000 <= nowMs`. Its comment wrongly says `due_ms` is the user's local time.\n\n- **IST user (offset 330), reminder at 09:00 local:** stored as 03:30Z, fires at 22:00Z the day before. That's **5.5 hours early**.\n- **US Eastern user (offset -300):** fires **5 hours late**.\n\nThe tests miss this because every scheduler test uses offset 0, and the create test also uses offset 0. **Fix:** make the scheduler check `r.due_ms <= nowMs`, and add a test that creates a reminder with a non-zero offset and runs it through the scheduler.\n\n### 2. Bad input is accepted with 201, and the reminder never fires\n`src/api.js:13` only checks that `at` is present, and line 8 assumes the exact format `YYYY-MM-DDTHH:mm`. Any other format becomes `NaN`:\n- `\"2026-03-01T09:00:00\"` (with seconds) becomes `...09:00:00:00Z`.\n- `\"2026-03-01T09:00Z\"` and `\"2026-03-01\"` also fail to parse.\n- A non-numeric `tzOffsetMin` gives `NaN` too.\n\n`NaN <= now` is always false, so the reminder is stored and never sent, with no error anywhere. **Fix:** check `at` against a strict regex, require `tzOffsetMin` to be an integer (roughly -720 to 840), reject a `NaN` result with 400, and return the reason.\n\n### 3. SQL injection in search (`src/api.js:31`)\nBoth `userId` and `q` are pasted straight into the SQL string. The in-memory stub happens to block this because it doesn't understand `OR`. The README says the stub has to be replaced so data survives restarts, and with a real database `userId=x' OR '1'='1` returns every user's reminders. Even an ordinary search like `mum's` would break the query. **Fix:** use placeholders like the other handlers (`... user_id = ? AND text LIKE ?` with `['%' + q + '%']`), and escape `%` and `_` in the search text if they should match literally.\n\n### 4. Delete has no owner check (`src/api.js:35-38`)\n`DELETE /reminders/:id` deletes by id alone. IDs are sequential numbers, so anyone can delete everyone's reminders by counting up. List and search also trust whatever `userId` the caller sends. How much this matters depends on whether an auth layer will sit in front. Right now nothing does: `src/index.js` only starts the scheduler, and only the tests call `handle()`. At minimum, scope the delete: `WHERE id = ? AND user_id = ?`.\n\n### Smaller issues, worth fixing but not urgent\n- **Missing parameters:** with no `userId`, list and search quietly search for user `'undefined'`. With no `query` object at all, they throw a TypeError. Both should return 400.\n- **Daylight saving:** the service stores one fixed offset, not a timezone name. A reminder created before a clock change, for a date after it, will fire an hour off. This doesn't affect IST, which has no daylight saving. Storing a timezone name like `Asia/Kolkata` would fix it if you have users in zones that change their clocks.\n\nProblems 1 and 2 are the ones users will hit: wrong delivery times and reminders that silently never arrive. I haven't changed any code. Do you want me to make the fixes and add the missing offset test?",
+  "ttft_ms": 1600,
+  "type": "result",
+  "duration_ms": 84781,
+  "uuid": "e6846005-7d5f-4241-a97d-d7287f897530",
+  "ttft_stream_ms": 861,
+  "time_to_request_ms": 24,
+  "first_content_frame_ms": 862,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

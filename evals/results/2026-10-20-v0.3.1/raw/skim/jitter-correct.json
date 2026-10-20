@@ -1,0 +1,139 @@
+{
+  "arm": "skim",
+  "case": "jitter-correct",
+  "kind": "read",
+  "prompt": "Why does retry.js add jitter, and is its implementation right?",
+  "wall_ms": 87979,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 86756,
+  "stop_reason": "end_turn",
+  "session_id": "eb220310-cf2d-4756-94a3-3b4240bb323d",
+  "total_cost_usd": 0.5596836000000001,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 27270,
+    "cache_read_input_tokens": 147718,
+    "output_tokens": 4696,
+    "output_tokens_details": {
+      "thinking_tokens": 3075
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25430,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 946,
+        "cache_read_input_tokens": 35779,
+        "cache_creation_input_tokens": 1702,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1702
+        },
+        "type": "message"
+      },
+      {
+        "input_tokens": 39030,
+        "output_tokens": 3371,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "advisor_message",
+        "model": "claude-opus-5-5"
+      },
+      {
+        "input_tokens": 2,
+        "output_tokens": 2072,
+        "cache_read_input_tokens": 37481,
+        "cache_creation_input_tokens": 1840,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 1840,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 39040,
+      "outputTokens": 8067,
+      "cacheReadInputTokens": 147718,
+      "cacheCreationInputTokens": 27270,
+      "webSearchRequests": 0,
+      "costUSD": 0.5596836000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3075,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01WArra9NmYAhSGyobXEU4yV",
+      "tool_input": {
+        "command": "node --input-type=module -e \"\nimport { backoffDelay } from './src/retry.js';\nconst N = 100000;\nfor (const a of [0,1,2,3,5,6,10]) {\n  let neg=0, over=0, min=Infinity, max=-Infinity;\n  for (let i=0;i<N;i++){ const d=backoffDelay(a); if(d<=0)neg++; if(d>10000)over++; min=Math.min(min,d); max=Math.max(max,d); }\n  console.log('attempt',a,'min',min.toFixed(0),'max',max.toFixed(0),'<=0:',(100*neg/N).toFixed(1)+'%','>cap:',(100*over/N).toFixed(1)+'%');\n}\n\" && node --test test/ 2>&1 | tail -8",
+        "description": "Measure backoff delay distribution and run tests"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Jitter keeps many failed sends from all retrying at the same moment. The current implementation gets it wrong.**\n\n**Why it's there** (`src/retry.js:2`): if a provider outage fails 1,000 reminders at once, plain backoff retries all 1,000 at exactly +200ms, then +400ms. The recovering provider gets hit in waves. Random offsets spread that load out.\n\n**Is it right: no.** `src/retry.js:8` adds a **fixed ±500ms** no matter how long the delay is:\n1. **Negative delays:** the first retry waits 200 ± 500, so −300 to 700ms. **30%** of first retries come out ≤0. Node raises those to 1ms, so they all fire together, which is the very thing jitter should prevent. For the second retry it's **10%**.\n2. **The noise drowns out the backoff:** with the default `attempts = 3`, only those two waits ever run (200 and 400ms). ±500ms is bigger than both, so the second wait can be shorter than the first.\n3. **The spread is too narrow at the cap:** at 10s, ±500ms is only ±5%, so long retries still bunch up.\n4. **It goes over `maxDelayMs`:** jitter is added after the cap is applied, so a wait can reach 10,500ms. This only happens with `attempts ≥ 8`.\n\n**Fix: full jitter.** Pick a random wait between 0 and the capped delay:\n```js\nexport function backoffDelay(attempt, { baseMs = 200, maxDelayMs = 10_000 } = {}) {\n  const exp = Math.min(maxDelayMs, baseMs * 2 ** attempt);\n  return Math.random() * exp;\n}\n```\nWith this, waits are never negative, never over the cap, and the spread grows with the delay. `JITTER_MS` can go. If you want a minimum wait, \"equal jitter\" works too: `exp / 2 + Math.random() * exp / 2`.\n\n**Not run:** the percentages come from the formula, not a measurement. My command to measure them and run `node --test` was denied, so I ran neither.\n\n**Also:**\n- The tests never call `backoffDelay` directly. They also pin `Math.random = 0.5`, which makes this jitter zero, so they can't catch any of the above.\n- After the fix, the `// no jitter` comment at `test/retry.test.js:6` becomes wrong, because 0.5 would mean half the delay. The tests would still pass, since they use `baseMs: 1`.\n- Today `baseMs: 1` still waits up to about 500ms, because `JITTER_MS` doesn't scale with the delay. The fix removes this.",
+  "ttft_ms": 2908,
+  "type": "result",
+  "duration_ms": 86804,
+  "uuid": "ef7b9bb0-e267-42a0-a67d-abca7416ee8e",
+  "ttft_stream_ms": 2681,
+  "time_to_request_ms": 23,
+  "first_content_frame_ms": 2681,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

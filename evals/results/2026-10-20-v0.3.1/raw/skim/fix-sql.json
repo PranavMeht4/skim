@@ -1,0 +1,125 @@
+{
+  "arm": "skim",
+  "case": "fix-sql",
+  "kind": "fix",
+  "prompt": "The search endpoint in src/api.js builds its SQL by string concatenation. Fix it. Add a test, and run `node --test test/` to confirm everything passes.",
+  "wall_ms": 119543,
+  "timed_out": false,
+  "exit_code": 0,
+  "stderr": "",
+  "duration_api_ms": 117429,
+  "stop_reason": "end_turn",
+  "session_id": "433b44fd-aed7-4741-af1a-7a814a4d5046",
+  "total_cost_usd": 0.754962,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 39683,
+    "cache_read_input_tokens": 370880,
+    "output_tokens": 7429,
+    "output_tokens_details": {
+      "thinking_tokens": 3748
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 35493,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 794,
+        "cache_read_input_tokens": 46579,
+        "cache_creation_input_tokens": 965,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 965
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 43923,
+      "outputTokens": 10010,
+      "cacheReadInputTokens": 370880,
+      "cacheCreationInputTokens": 39683,
+      "webSearchRequests": 0,
+      "costUSD": 0.754962,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3748,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [
+    {
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01GGpBDJJomhMFDMXMRCVEDM",
+      "tool_input": {
+        "command": "for f in src/api.js src/db.js test/api.test.js README.md src/index.js src/legacy.js config.json; do echo \"=== $f\"; cat -n $f; done",
+        "description": "Show api, db, tests, and related source files"
+      }
+    }
+  ],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 16,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**✓ Search injection fixed. 13/13 tests pass** (`node --test test/`).\n\n- `src/api.js:30`: the search now uses placeholders, `user_id = ? AND text LIKE ?`, with `[q.userId, `%${q.q}%`]` as params. No user input goes into the SQL string any more.\n- `test/api.test.js`: 2 new tests. **Both failed on the old code**, then passed after the fix:\n  1. **Injection test:** a hostile `userId` and `q` (quotes, `OR 1=1`, `--`) must not appear in the logged SQL, only in `params`. Old failure: `SELECT * FROM reminders WHERE user_id = 'u1' OR '1'='1' AND text LIKE '%x%' OR 1=1 --%'`\n  2. **Behavior test:** searching \"milk and eggs\" returns only u1's match. The old code crashed with `unsupported condition: text LIKE '%milk`.\n- **Before the change: 11/11 passed.** Nothing else broke.\n- I checked `src/` for other SQL built by joining strings. **None found.**\n\n**Also:**\n- **There is no auth on these routes.** `userId` comes straight from the query string, so any caller can read any user's reminders, injection or not.\n- A `%` or `_` typed into the search still acts as a LIKE wildcard in real SQL. I didn't fix that, because the in-memory `db.js` doesn't support `ESCAPE`.\n- If `q` is missing, the search still looks for the literal text \"undefined\". The old code did the same.",
+  "ttft_ms": 3139,
+  "type": "result",
+  "duration_ms": 118313,
+  "uuid": "f6952a63-3eda-419f-bbbc-fe76e79cb01b",
+  "ttft_stream_ms": 2897,
+  "time_to_request_ms": 232,
+  "first_content_frame_ms": 2897,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "hidden_check": {
+    "pass": true,
+    "reasons": [],
+    "tests": {
+      "total": 13,
+      "pass": 13,
+      "fail": 0
+    }
+  }
+}
